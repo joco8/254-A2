@@ -24,6 +24,10 @@ token scan() {
         c = getchar();
         cout << "After get char";
     }
+
+
+
+    
     if (c == EOF)
         return t_eof;
     if (isalpha(c)) {
