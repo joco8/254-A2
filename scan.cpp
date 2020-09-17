@@ -68,6 +68,12 @@ token scan() {
         case '-': c = getchar(); return t_sub;
         case '*': c = getchar(); return t_mul;
         case '/': c = getchar(); return t_div;
+        case '=': c = getchar(); return t_equal;
+        case '<>': c = getchar(); return t_nequal;
+        case '<': c = getchar(); return t_lthan;
+        case '>': c = getchar(); return t_gthan;
+        case '<=': c = getchar(); return t_loreq;
+        case '=>': c = getchar(); return t_goreq;
         default:
             printf("error\n");
             exit(1);

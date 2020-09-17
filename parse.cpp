@@ -6,7 +6,8 @@
 using namespace std;
 
 const char* names[] = {"read", "write", "id", "literal", "gets",
-                       "add", "sub", "mul", "div", "lparen", "rparen", "eof"};
+                       "add", "sub", "mul", "div", "lparen", "rparen", "eof",
+                       "equal", "nequal", "lthan", "gthan", "goreq", "loreq"};
 
 static token input_token;
 
