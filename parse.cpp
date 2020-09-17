@@ -39,16 +39,25 @@ void factor_tail ();
 void add_op ();
 void mul_op ();
 void r_op(); // TODO: Figure out what r stands for
+void condition();
+
+// TODO: Delete "predict program" print statements when no longer useful
 
 void program () {
     switch (input_token) {
         case t_id:
+            stmt_list();
+            break;
         case t_read:
+            stmt_list();
+            break;
         case t_write:
+            stmt_list();
+            break;
         case t_eof:
             printf ("predict program --> stmt_list eof\n");
             stmt_list ();
-            match (t_eof);
+            match (t_eof); // Do we only match when we consume a terminal in the line of the grammar we're in the method of?
             break;
         default: error ();
     }
@@ -57,7 +66,13 @@ void program () {
 void stmt_list () {
     switch (input_token) {
         case t_id:
+            stmt();
+            stmt_list ();
+            break;
         case t_read:
+            stmt();
+            stmt_list ();
+            break;
         case t_write:
             printf ("predict stmt_list --> stmt stmt_list\n");
             stmt ();
@@ -88,6 +103,20 @@ void stmt () {
             match (t_write);
             expr ();
             break;
+        case t_if:
+            match (t_if);
+            condition();
+            // Have conditional return T/F and call next line only if T?
+            stmt_list();
+            match(t_end);
+            break;
+        case t_while:
+            match (t_while);
+            condition();
+            // Have conditional return T/F and call next line only if T?
+            stmt_list();
+            match(t_end);
+            break;
         default: error ();
     }
 }
@@ -95,7 +124,13 @@ void stmt () {
 void expr () {
     switch (input_token) {
         case t_id:
+            term();
+            term_tail();
+            break;
         case t_literal:
+            term();
+            term_tail();
+            break;
         case t_lparen:
             printf ("predict expr --> term term_tail\n");
             term ();
@@ -108,7 +143,13 @@ void expr () {
 void term () {
     switch (input_token) {
         case t_id:
+            factor ();
+            factor_tail ();
+            break;
         case t_literal:
+            factor ();
+            factor_tail ();
+            break;
         case t_lparen:
             printf ("predict term --> factor factor_tail\n");
             factor ();
@@ -121,13 +162,17 @@ void term () {
 void term_tail () {
     switch (input_token) {
         case t_add:
+            add_op ();
+            term ();
+            term_tail ();
+            break;
         case t_sub:
             printf ("predict term_tail --> add_op term term_tail\n");
             add_op ();
             term ();
             term_tail ();
             break;
-        case t_rparen:
+        case t_rparen: //How could this be a rparen?
         case t_id:
         case t_read:
         case t_write:
@@ -161,6 +206,10 @@ void factor () {
 void factor_tail () {
     switch (input_token) {
         case t_mul:
+            mul_op ();
+            factor ();
+            factor_tail ();
+            break;
         case t_div:
             printf ("predict factor_tail --> mul_op factor factor_tail\n");
             mul_op ();
@@ -205,6 +254,38 @@ void mul_op () {
             match (t_div);
             break;
         default: error ();
+    }
+}
+
+// Bare bones - will need more logic
+void r_op () {
+    switch (input_token) {
+        case t_equal:
+            match (t_equal);
+            break;
+        case t_nequal:
+            match (t_nequal);
+            break;
+        case t_lthan:
+            match (t_lthan);
+            break;
+        case t_gthan:
+            match (t_gthan);
+            break;
+        case t_loreq:
+            match (t_loreq);
+            break;
+        case t_goreq:
+            match (t_goreq);
+            break;
+        default: error ();
+    }
+}
+
+void condition() {
+    // only execute if statement if this condi is true - make this non-void?
+    // how do we know what r_op verifies the token is?
+    switch (input_token) {
     }
 }
 
