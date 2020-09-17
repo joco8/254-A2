@@ -7,7 +7,8 @@ using namespace std;
 
 const char* names[] = {"read", "write", "id", "literal", "gets",
                        "add", "sub", "mul", "div", "lparen", "rparen", "eof",
-                       "equal", "nequal", "lthan", "gthan", "goreq", "loreq"};
+                       "equal", "nequal", "lthan", "gthan", "goreq", "loreq",
+                       "if", "while", "end"};
 
 static token input_token;
 
@@ -37,6 +38,7 @@ void factor ();
 void factor_tail ();
 void add_op ();
 void mul_op ();
+void r_op(); // TODO: Figure out what r stands for
 
 void program () {
     switch (input_token) {
