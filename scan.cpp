@@ -1,32 +1,37 @@
-/* Simple ad-hoc scanner for the calculator language.
-    Michael L. Scott, 2008-2020.
-*/
+#include <cstdio>
+#include <cstdlib> 
+#include <cstring>
+#include "scan.h"
+#include <iostream> // will need to delete this as I don't think we should have print statements? 
 
-#include "stdio.h"
-#include "stdlib.h"
-#include "string.h"
-#include "ctype.h"
+// Not sure which of the types we'll need yet
+#include <cwctype>
+#include <cctype>
 
-#include "scan.c"
 
-char token_image[MAX_TOKEN_LEN];
+using namespace std;
+
+char token_image[MAX_TOKEN_LEN]; 
 
 token scan() {
     static int c = ' ';
         /* next available char; extra (int) width accommodates EOF */
     int i = 0;              /* index into token_image */
-
+    cout << c;
     /* skip white space */
     while (isspace(c)) {
+        cout << c;
         c = getchar();
+        cout << "After get char";
     }
     if (c == EOF)
         return t_eof;
     if (isalpha(c)) {
+        cout << c;
         do {
             token_image[i++] = c;
             if (i >= MAX_TOKEN_LEN) {
-                printf("max token length exceeded\n");
+                cout << "max token length exceeded\n";
                 exit(1);
             }
             c = getchar();
@@ -64,3 +69,4 @@ token scan() {
             exit(1);
     }
 }
+
