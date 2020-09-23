@@ -30,7 +30,7 @@ token scan() {
     
     if (c == EOF)
         return t_eof;
-    if (isalpha(c)) {
+    if (isalpha(c)) { // is c an alphabetic letter
         cout << c;
         do {
             token_image[i++] = c;
@@ -43,6 +43,9 @@ token scan() {
         token_image[i] = '\0';
         if (!strcmp(token_image, "read")) return t_read;
         else if (!strcmp(token_image, "write")) return t_write;
+        else if (!strcmp(token_image, "if")) return t_if;
+        else if (!strcmp(token_image, "while")) return t_while;
+        else if (!strcmp(token_image, "end")) return t_end;
         else return t_id;
     }
     else if (isdigit(c)) {
@@ -68,6 +71,26 @@ token scan() {
         case '-': c = getchar(); return t_sub;
         case '*': c = getchar(); return t_mul;
         case '/': c = getchar(); return t_div;
+        case '=': c = getchar(); return t_equal;
+        case '<': 
+            c = getchar();
+            if (c == '>') {
+                c = getchar();
+                return t_nequal;
+            } else if (c == '=') {
+                c = getchar();
+                return t_loreq;
+            } else {
+                return t_lthan;
+            }
+        case '>': 
+            c = getchar();
+            if (c == '=') {
+                c = getchar();
+                return t_goreq;
+            } else {
+                return t_gthan;
+            }
         default:
             printf("error\n");
             exit(1);
