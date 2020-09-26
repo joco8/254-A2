@@ -161,7 +161,7 @@ void mul_op ();
 void r_op(); // TODO: Figure out what r stands for
 void condition();
 
-// TODO: Delete "predict program" print statements when no longer useful
+// TODO: Delete "predict program" print statements when no longer useful - can not use 'printf'
 
 void program () {
     check_for_errors("p");

@@ -3,11 +3,9 @@
 #include <cstring>
 #include "scan.h"
 #include <iostream> // will need to delete this as I don't think we should have print statements? 
-
 // Not sure which of the types we'll need yet
 #include <cwctype>
 #include <cctype>
-
 
 using namespace std;
 
@@ -24,7 +22,6 @@ token scan() {
         c = getchar();
         // cout << "After get char";
     }
-
     if (c == EOF)
         return t_eof;
         
