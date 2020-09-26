@@ -70,7 +70,7 @@ static bool EPS(char* production){
 
 
 void error () {
-    printf ("sy ntax error\n");
+    printf ("syntax error\n");
     return;
     // exit (1);
 }
@@ -102,27 +102,32 @@ void factor ();
 void factor_tail ();
 void add_op ();
 void mul_op ();
-void r_op(); // TODO: Figure out what r stands for
+void r_op();
 void condition();
 
 // TODO: Delete "predict program" print statements when no longer useful - can not use 'printf'
 
 void program () {
-    cout << input_token;
+    // cout << input_token;
     switch (input_token) {
         case t_id:
+            printf ("predict program --> stmt_list eof\n");
             stmt_list();
             break;
         case t_read:
+            printf ("predict program --> stmt_list eof\n");
             stmt_list();
             break;
         case t_write:
+            printf ("predict program --> stmt_list eof\n");
             stmt_list();
             break;
         case t_if:
+            printf ("predict program --> stmt_list eof\n");
             stmt_list();
             break;
         case t_while:
+            printf ("predict program --> stmt_list eof\n");
             stmt_list();
             break;
         case t_eof:
@@ -130,7 +135,8 @@ void program () {
             stmt_list ();
             match (t_eof); // Do we only match when we consume a terminal in the line of the grammar we're in the method of?
             break;
-        default: error ();
+        default:
+            error ();
     }
 }
 
@@ -161,10 +167,12 @@ void stmt_list () {
             stmt();
             stmt_list();
             break;
+        case t_end:
         case t_eof:
             printf ("predict stmt_list --> epsilon\n");
             break;          /* epsilon production */
-        default: error ();
+        default:
+            error ();
     }
 }
 
@@ -203,7 +211,6 @@ void stmt () {
             match(t_end);
             break;
         default:
-            cout << input_token;
             error ();
     }
 }
@@ -211,10 +218,12 @@ void stmt () {
 void expr () {
     switch (input_token) {
         case t_id:
+            printf ("predict expr --> term term_tail\n");
             term();
             term_tail();
             break;
         case t_literal:
+            printf ("predict expr --> term term_tail\n");
             term();
             term_tail();
             break;
@@ -223,17 +232,20 @@ void expr () {
             term ();
             term_tail ();
             break;
-        default: error ();
+        default:
+            error ();
     }
 }
 
 void term () {
     switch (input_token) {
         case t_id:
+            printf ("predict term --> factor factor_tail\n");
             factor ();
             factor_tail ();
             break;
         case t_literal:
+            printf ("predict term --> factor factor_tail\n");
             factor ();
             factor_tail ();
             break;
@@ -242,19 +254,21 @@ void term () {
             factor ();
             factor_tail ();
             break;
-        default: error ();
+        default:
+            error ();
     }
 }
 
 void term_tail () {
     switch (input_token) {
         case t_add:
+            printf ("predict term_tail --> add_op term term_tail\n");
             add_op ();
             term ();
             term_tail ();
             break;
         case t_sub:
-            printf ("predict term_tail --> add_op term term_tail\n");
+            printf ("predict term_tail --> sub_op term term_tail\n");
             add_op ();
             term ();
             term_tail ();
@@ -263,10 +277,18 @@ void term_tail () {
         case t_id:
         case t_read:
         case t_write:
+        case t_equal:
+        case t_nequal:
+        case t_gthan:
+        case t_lthan:
+        case t_goreq:
+        case t_loreq:
+        case t_end:
         case t_eof:
             printf ("predict term_tail --> epsilon\n");
             break;          /* epsilon production */
-        default: error ();
+        default:
+            error ();
     }
 }
 
@@ -286,19 +308,21 @@ void factor () {
             expr ();
             match (t_rparen);
             break;
-        default: error ();
+        default:
+            error ();
     }
 }
 
 void factor_tail () {
     switch (input_token) {
         case t_mul:
+        printf ("predict factor_tail --> mul_op factor factor_tail\n");
             mul_op ();
             factor ();
             factor_tail ();
             break;
         case t_div:
-            printf ("predict factor_tail --> mul_op factor factor_tail\n");
+            printf ("predict factor_tail --> div_op factor factor_tail\n");
             mul_op ();
             factor ();
             factor_tail ();
@@ -309,10 +333,18 @@ void factor_tail () {
         case t_id:
         case t_read:
         case t_write:
+        case t_equal:
+        case t_nequal:
+        case t_gthan:
+        case t_lthan:
+        case t_goreq:
+        case t_loreq:
+        case t_end:
         case t_eof:
             printf ("predict factor_tail --> epsilon\n");
             break;          /* epsilon production */
-        default: error ();
+        default:
+            error ();
     }
 }
 
@@ -326,7 +358,8 @@ void add_op () {
             printf ("predict add_op --> sub\n");
             match (t_sub);
             break;
-        default: error ();
+        default:
+            error ();
     }
 }
 
@@ -340,7 +373,8 @@ void mul_op () {
             printf ("predict mul_op --> div\n");
             match (t_div);
             break;
-        default: error ();
+        default:
+            error ();
     }
 }
 
@@ -365,7 +399,8 @@ void r_op () {
         case t_goreq:
             match (t_goreq);
             break;
-        default: error ();
+        default:
+            error ();
     }
 }
 
@@ -388,7 +423,8 @@ void condition() {
             r_op();
             expr();
             break;
-        default: error();
+        default:
+            error();
     }
 }
 
