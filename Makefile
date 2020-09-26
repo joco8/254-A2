@@ -4,7 +4,7 @@
 # Note that rule for goal (parse) must be the first one in this file.
 
 parse: 
-	g++ -o parse parse.cpp scan.cpp
+	g++ -std=c++11 -o parse parse.cpp scan.cpp
 
 clean:
 	rm *.o parse
