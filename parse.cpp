@@ -109,7 +109,7 @@ static bool EPS(std::string production){
 
 
 void error () {
-    printf ("sy nta x error\n");
+    printf ("syntax error\n");
     return;
     // exit (1);
 }
@@ -136,10 +136,10 @@ void check_for_errors(std::string symbol) {
 void match (token expected) {
 
     if (input_token == expected) {
-        printf ("matched %s", names[input_token]);
+        printf ("matched %s", names[input_token]); // Remove printf
         if (input_token == t_id || input_token == t_literal)
-            printf (": %s", token_image);
-        printf ("\n");
+            printf (": %s", token_image); // Remove printf
+        printf ("\n"); // Remove printf
         input_token = scan ();
     }
     else 
@@ -158,7 +158,7 @@ void factor ();
 void factor_tail ();
 void add_op ();
 void mul_op ();
-void r_op(); // TODO: Figure out what r stands for
+void r_op();
 void condition();
 
 // TODO: Delete "predict program" print statements when no longer useful - can not use 'printf'
@@ -169,12 +169,23 @@ void program () {
     
     switch (input_token) {
         case t_id:
+            printf ("predict program --> stmt_list eof\n");
             stmt_list();
             break;
         case t_read:
+            printf ("predict program --> stmt_list eof\n");
             stmt_list();
             break;
         case t_write:
+            printf ("predict program --> stmt_list eof\n");
+            stmt_list();
+            break;
+        case t_if:
+            printf ("predict program --> stmt_list eof\n");
+            stmt_list();
+            break;
+        case t_while:
+            printf ("predict program --> stmt_list eof\n");
             stmt_list();
             break;
         case t_eof:
@@ -182,7 +193,8 @@ void program () {
             stmt_list ();
             match (t_eof); // Do we only match when we consume a terminal in the line of the grammar we're in the method of?
             break;
-        default: error ();
+        default:
+            error ();
     }
 }
 
@@ -190,10 +202,12 @@ void stmt_list () {
     check_for_errors("stmt_list");
     switch (input_token) {
         case t_id:
+            printf ("predict stmt_list --> stmt stmt_list\n");
             stmt();
             stmt_list ();
             break;
         case t_read:
+            printf ("predict stmt_list --> stmt stmt_list\n");
             stmt();
             stmt_list ();
             break;
@@ -202,10 +216,22 @@ void stmt_list () {
             stmt ();
             stmt_list ();
             break;
+        case t_if:
+            printf ("predict stmt_list --> stmt stmt_list\n");
+            stmt();
+            stmt_list();
+            break;
+        case t_while:
+            printf ("predict stmt_list --> stmt stmt_list\n");
+            stmt();
+            stmt_list();
+            break;
+        case t_end:
         case t_eof:
             printf ("predict stmt_list --> epsilon\n");
             break;          /* epsilon production */
-        default: error ();
+        default:
+            error ();
     }
 }
 
@@ -229,6 +255,7 @@ void stmt () {
             expr ();
             break;
         case t_if:
+            printf ("predict stmt --> if cond\n");
             match (t_if);
             condition();
             // Have conditional return T/F and call next line only if T?
@@ -236,13 +263,15 @@ void stmt () {
             match(t_end);
             break;
         case t_while:
+            printf ("predict stmt --> while cond\n");
             match (t_while);
             condition();
             // Have conditional return T/F and call next line only if T?
             stmt_list();
             match(t_end);
             break;
-        default: error ();
+        default:
+            error ();
     }
 }
 
@@ -250,10 +279,12 @@ void expr () {
     check_for_errors("eprx");
     switch (input_token) {
         case t_id:
+            printf ("predict expr --> term term_tail\n");
             term();
             term_tail();
             break;
         case t_literal:
+            printf ("predict expr --> term term_tail\n");
             term();
             term_tail();
             break;
@@ -262,7 +293,8 @@ void expr () {
             term ();
             term_tail ();
             break;
-        default: error ();
+        default:
+            error ();
     }
 }
 
@@ -270,10 +302,12 @@ void term () {
     check_for_errors("term");
     switch (input_token) {
         case t_id:
+            printf ("predict term --> factor factor_tail\n");
             factor ();
             factor_tail ();
             break;
         case t_literal:
+            printf ("predict term --> factor factor_tail\n");
             factor ();
             factor_tail ();
             break;
@@ -282,7 +316,8 @@ void term () {
             factor ();
             factor_tail ();
             break;
-        default: error ();
+        default:
+            error ();
     }
 }
 
@@ -290,24 +325,33 @@ void term_tail () {
     check_for_errors("term_tail");
     switch (input_token) {
         case t_add:
-            add_op ();
-            term ();
-            term_tail ();
-            break;
-        case t_sub:
             printf ("predict term_tail --> add_op term term_tail\n");
             add_op ();
             term ();
             term_tail ();
             break;
-        case t_rparen: //How could this be a rparen?
+        case t_sub:
+            printf ("predict term_tail --> sub_op term term_tail\n");
+            add_op ();
+            term ();
+            term_tail ();
+            break;
+        case t_rparen: //How could this be a rparen? - if the expression is already finished - do nothing here?
         case t_id:
         case t_read:
         case t_write:
+        case t_equal:
+        case t_nequal:
+        case t_gthan:
+        case t_lthan:
+        case t_goreq:
+        case t_loreq:
+        case t_end:
         case t_eof:
             printf ("predict term_tail --> epsilon\n");
             break;          /* epsilon production */
-        default: error ();
+        default:
+            error ();
     }
 }
 
@@ -328,7 +372,8 @@ void factor () {
             expr ();
             match (t_rparen);
             break;
-        default: error ();
+        default:
+            error ();
     }
 }
 
@@ -336,12 +381,13 @@ void factor_tail () {
     check_for_errors("factor_tail");
     switch (input_token) {
         case t_mul:
+        printf ("predict factor_tail --> mul_op factor factor_tail\n");
             mul_op ();
             factor ();
             factor_tail ();
             break;
         case t_div:
-            printf ("predict factor_tail --> mul_op factor factor_tail\n");
+            printf ("predict factor_tail --> div_op factor factor_tail\n");
             mul_op ();
             factor ();
             factor_tail ();
@@ -352,10 +398,18 @@ void factor_tail () {
         case t_id:
         case t_read:
         case t_write:
+        case t_equal:
+        case t_nequal:
+        case t_gthan:
+        case t_lthan:
+        case t_goreq:
+        case t_loreq:
+        case t_end:
         case t_eof:
             printf ("predict factor_tail --> epsilon\n");
             break;          /* epsilon production */
-        default: error ();
+        default:
+            error ();
     }
 }
 
@@ -370,7 +424,8 @@ void add_op () {
             printf ("predict add_op --> sub\n");
             match (t_sub);
             break;
-        default: error ();
+        default:
+            error ();
     }
 }
 
@@ -385,7 +440,8 @@ void mul_op () {
             printf ("predict mul_op --> div\n");
             match (t_div);
             break;
-        default: error ();
+        default:
+            error ();
     }
 }
 
@@ -411,14 +467,32 @@ void r_op () {
         case t_goreq:
             match (t_goreq);
             break;
-        default: error ();
+        default:
+            error ();
     }
 }
 
 void condition() {
-    // only execute if statement if this condi is true - make this non-void?
-    // how do we know what r_op verifies the token is?
+    // return non-void? expr rop expr must be true for SL in S to execute
     switch (input_token) {
+        case t_lparen:
+            expr();
+            r_op();
+            expr();
+            break;
+        case t_id:
+            printf("Reading id for conditional\n");
+            expr();
+            r_op();
+            expr();
+            break;
+        case t_literal:
+            expr();
+            r_op();
+            expr();
+            break;
+        default:
+            error();
     }
 }
 
