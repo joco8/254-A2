@@ -17,21 +17,19 @@ token scan() {
     static int c = ' ';
         /* next available char; extra (int) width accommodates EOF */
     int i = 0;              /* index into token_image */
-    cout << c;
+    // cout << c;
     /* skip white space */
     while (isspace(c)) {
-        cout << c;
+        // cout << c;
         c = getchar();
-        cout << "After get char";
+        // cout << "After get char";
     }
 
-
-
-    
     if (c == EOF)
         return t_eof;
+        
     if (isalpha(c)) { // is c an alphabetic letter
-        cout << c;
+        // cout << c;
         do {
             token_image[i++] = c;
             if (i >= MAX_TOKEN_LEN) {

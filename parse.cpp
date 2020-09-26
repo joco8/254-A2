@@ -44,6 +44,7 @@ void condition();
 // TODO: Delete "predict program" print statements when no longer useful
 
 void program () {
+    cout << input_token
     switch (input_token) {
         case t_id:
             stmt_list();
@@ -291,7 +292,7 @@ void condition() {
 
 int main () {
     input_token = scan ();
-    cout << input_token;
+    // cout << input_token;
     program ();
     return 0;
 }
