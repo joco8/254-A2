@@ -1,9 +1,11 @@
 #include <cstdio>
 #include <cstdlib> 
 #include <iostream>
-#include "scan.cpp"
+#include <vector>
+#include "scan.h"
 
 using namespace std;
+
 
 const char* names[] = {"read", "write", "id", "literal", "gets",
                        "add", "sub", "mul", "div", "lparen", "rparen", "eof",
@@ -12,10 +14,71 @@ const char* names[] = {"read", "write", "id", "literal", "gets",
 
 static token input_token;
 
-void error () {
-    printf ("syntax errorr\n");
-    exit (1);
+
+// Create dictionaries for first and follow sets of each production 
+
+vector<token> first_p = {t_id, t_read, t_write, t_eof};
+vector<token> first_stmt_list = {t_id, t_read, t_write};
+vector<token> first_stmt = {t_id, t_read, t_write};
+vector<token> first_expr = {t_lparen, t_id, t_literal};
+vector<token> first_term_tail = {t_add, t_sub};
+vector<token> first_term = {t_lparen, t_id, t_literal};
+vector<token> first_factor_tail = {t_mul, t_div};
+vector<token> first_factor = {t_lparen, t_id, t_literal};
+vector<token> first_add_op = {t_add, t_sub};
+vector<token> first_mul_op = {t_mul, t_div};
+
+
+// Create Dictionaries for follow sets 
+vector<token> follow_p = {};
+vector<token> follow_stmt_list = {t_eof};
+vector<token> follow_stmt = {t_id, t_read, t_write, t_eof};
+vector<token> follow_expr = {t_rparen, t_id, t_read, t_write, t_eof};
+vector<token> follow_term_tail = {t_rparen, t_id, t_read, t_write, t_eof};
+vector<token> follow_term = {t_add, t_sub, t_rparen, t_id, t_read, t_write ,t_eof};
+vector<token> follow_factor_tail = {t_add, t_sub, t_rparen, t_id, t_read, t_write, t_eof};
+vector<token> follow_factor = { t_add, t_sub, t_mul, t_div, t_rparen, t_id, t_read, t_write, t_eof};
+vector<token> follow_add_op = {t_lparen, t_id, t_literal};
+vector<token> follow_mul_op = {t_lparen, t_id, t_literal};
+
+// epsilon values for each production 
+static bool EPS(char* production){
+
+    bool p = false;
+    bool stmt_list = true; 
+    bool stmt =  false;
+    bool expr = false;
+    bool term_tail = true;
+    bool term = false;
+    bool factor_tail = true; 
+    bool factor = false;
+    bool add_op = false;
+    bool mul_op = false;
+
+    const char* cArr[] = {"p", "stmt_list", "stmt", "expr", "term_tail", "term", "factor_tail", "factor", "add_op", "mul_op"};
+    const bool arr[] = {p, stmt_list, stmt, expr, term_tail, term, factor_tail, factor, add_op, mul_op};
+    for(int i = 0; i < sizeof(cArr); i++){
+        if (cArr[i] == production) {
+            return arr[i];
+        }
+    }
+
+    return false;
 }
+
+
+
+
+void error () {
+    printf ("sy ntax error\n");
+    return;
+    // exit (1);
+}
+
+void check_for_error(token symbol) {
+
+}
+
 
 void match (token expected) {
     if (input_token == expected) {
@@ -26,7 +89,6 @@ void match (token expected) {
         input_token = scan ();
     }
     else 
-        
         error ();
 }
 
@@ -46,6 +108,7 @@ void condition();
 // TODO: Delete "predict program" print statements when no longer useful - can not use 'printf'
 
 void program () {
+    cout << input_token;
     switch (input_token) {
         case t_id:
             stmt_list();
@@ -331,7 +394,7 @@ void condition() {
 
 int main () {
     input_token = scan ();
-    // cout << input_token;
+    cout << EPS("p");
     program ();
     return 0;
 }
