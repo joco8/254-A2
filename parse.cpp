@@ -2,10 +2,10 @@
 #include <cstdlib> 
 #include <iostream>
 #include <vector>
+#include <map>
 #include "scan.h"
 
 using namespace std;
-
 
 const char* names[] = {"read", "write", "id", "literal", "gets",
                        "add", "sub", "mul", "div", "lparen", "rparen", "eof",
@@ -16,33 +16,71 @@ static token input_token;
 
 
 // Create dictionaries for first and follow sets of each production 
+static bool FIRST(std::string symbol){
+    vector<token> p = {t_id, t_read, t_write, t_eof};
+    vector<token> stmt_list = {t_id, t_read, t_write};
+    vector<token> stmt = {t_id, t_read, t_write};
+    vector<token> expr = {t_lparen, t_id, t_literal};
+    vector<token> term_tail = {t_add, t_sub};
+    vector<token> term = {t_lparen, t_id, t_literal};
+    vector<token> factor_tail = {t_mul, t_div};
+    vector<token> factor = {t_lparen, t_id, t_literal};
+    vector<token> add_op = {t_add, t_sub};
+    vector<token> mul_op = {t_mul, t_div};
 
-vector<token> first_p = {t_id, t_read, t_write, t_eof};
-vector<token> first_stmt_list = {t_id, t_read, t_write};
-vector<token> first_stmt = {t_id, t_read, t_write};
-vector<token> first_expr = {t_lparen, t_id, t_literal};
-vector<token> first_term_tail = {t_add, t_sub};
-vector<token> first_term = {t_lparen, t_id, t_literal};
-vector<token> first_factor_tail = {t_mul, t_div};
-vector<token> first_factor = {t_lparen, t_id, t_literal};
-vector<token> first_add_op = {t_add, t_sub};
-vector<token> first_mul_op = {t_mul, t_div};
+    map<std::string, vector<token> > symbolTable;
+    symbolTable = {
+        {"p", p}, {"stmt_list", stmt_list}, {"stmt", stmt}, {"expr", expr}, {"term_tail", term_tail},
+     {"term", term}, {"factor_tail", factor_tail}, {"factor", factor}, {"add_op", add_op}, {"mul_op", mul_op}
+     
+    };
+
+    for(token i : symbolTable[symbol]) {
+        if(input_token == i) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+static bool FOLLOW(std::string symbol) {
+    // Create Dictionaries for follow sets 
+    vector<token> p = {};
+    vector<token> stmt_list = {t_eof};
+    vector<token> stmt = {t_id, t_read, t_write, t_eof};
+    vector<token> expr = {t_rparen, t_id, t_read, t_write, t_eof};
+    vector<token> term_tail = {t_rparen, t_id, t_read, t_write, t_eof};
+    vector<token> term = {t_add, t_sub, t_rparen, t_id, t_read, t_write ,t_eof};
+    vector<token> factor_tail = {t_add, t_sub, t_rparen, t_id, t_read, t_write, t_eof};
+    vector<token> factor = { t_add, t_sub, t_mul, t_div, t_rparen, t_id, t_read, t_write, t_eof};
+    vector<token> add_op = {t_lparen, t_id, t_literal};
+    vector<token> mul_op = {t_lparen, t_id, t_literal};
+
+    map<std::string, vector<token> > symbolTable;
+    symbolTable = {
+        {"p", p}, {"stmt_list", stmt_list}, {"stmt", stmt}, {"expr", expr}, {"term_tail", term_tail},
+     {"term", term}, {"factor_tail", factor_tail}, {"factor", factor}, {"add_op", add_op}, {"mul_op", mul_op}
+     
+    };
+
+    for(token i : symbolTable[symbol]) {
+        cout << i;
+        if(input_token == i) {
+            return true;
+        }
+    }
+
+    return false;
+
+}
 
 
-// Create Dictionaries for follow sets 
-vector<token> follow_p = {};
-vector<token> follow_stmt_list = {t_eof};
-vector<token> follow_stmt = {t_id, t_read, t_write, t_eof};
-vector<token> follow_expr = {t_rparen, t_id, t_read, t_write, t_eof};
-vector<token> follow_term_tail = {t_rparen, t_id, t_read, t_write, t_eof};
-vector<token> follow_term = {t_add, t_sub, t_rparen, t_id, t_read, t_write ,t_eof};
-vector<token> follow_factor_tail = {t_add, t_sub, t_rparen, t_id, t_read, t_write, t_eof};
-vector<token> follow_factor = { t_add, t_sub, t_mul, t_div, t_rparen, t_id, t_read, t_write, t_eof};
-vector<token> follow_add_op = {t_lparen, t_id, t_literal};
-vector<token> follow_mul_op = {t_lparen, t_id, t_literal};
+
+
 
 // epsilon values for each production 
-static bool EPS(char* production){
+static bool EPS(std::string production){
 
     bool p = false;
     bool stmt_list = true; 
@@ -55,10 +93,11 @@ static bool EPS(char* production){
     bool add_op = false;
     bool mul_op = false;
 
-    const char* cArr[] = {"p", "stmt_list", "stmt", "expr", "term_tail", "term", "factor_tail", "factor", "add_op", "mul_op"};
+    const std::string cArr[] = {"p", "stmt_list", "stmt", "expr", "term_tail", "term", "factor_tail", "factor", "add_op", "mul_op"};
     const bool arr[] = {p, stmt_list, stmt, expr, term_tail, term, factor_tail, factor, add_op, mul_op};
     for(int i = 0; i < sizeof(cArr); i++){
         if (cArr[i] == production) {
+            
             return arr[i];
         }
     }
@@ -70,17 +109,32 @@ static bool EPS(char* production){
 
 
 void error () {
-    printf ("sy ntax error\n");
+    printf ("sy nta x error\n");
     return;
     // exit (1);
 }
 
-void check_for_error(token symbol) {
+void report_error() {
+    printf("\nWE GOT AN ERROR BABY WHAT DO I DO NOW?\n");
+}
 
+
+
+void check_for_errors(std::string symbol) {
+
+    if(!(FIRST(symbol) || EPS(symbol))) {
+        report_error ();
+        input_token = scan();
+        while (!FIRST(symbol) && !FOLLOW(symbol) && input_token != t_eof) {
+            printf("input token in error %s \n", names[input_token]);
+            input_token = scan();
+        }
+    }
 }
 
 
 void match (token expected) {
+
     if (input_token == expected) {
         printf ("matched %s", names[input_token]);
         if (input_token == t_id || input_token == t_literal)
@@ -91,6 +145,8 @@ void match (token expected) {
     else 
         error ();
 }
+
+
 
 void program ();
 void stmt_list ();
@@ -108,7 +164,9 @@ void condition();
 // TODO: Delete "predict program" print statements when no longer useful
 
 void program () {
-    cout << input_token;
+    check_for_errors("p");
+
+    
     switch (input_token) {
         case t_id:
             stmt_list();
@@ -129,6 +187,7 @@ void program () {
 }
 
 void stmt_list () {
+    check_for_errors("stmt_list");
     switch (input_token) {
         case t_id:
             stmt();
@@ -151,6 +210,7 @@ void stmt_list () {
 }
 
 void stmt () {
+    check_for_errors("stmt");
     switch (input_token) {
         case t_id:
             printf ("predict stmt --> id gets expr\n");
@@ -187,6 +247,7 @@ void stmt () {
 }
 
 void expr () {
+    check_for_errors("eprx");
     switch (input_token) {
         case t_id:
             term();
@@ -206,6 +267,7 @@ void expr () {
 }
 
 void term () {
+    check_for_errors("term");
     switch (input_token) {
         case t_id:
             factor ();
@@ -225,6 +287,7 @@ void term () {
 }
 
 void term_tail () {
+    check_for_errors("term_tail");
     switch (input_token) {
         case t_add:
             add_op ();
@@ -249,6 +312,7 @@ void term_tail () {
 }
 
 void factor () {
+    check_for_errors("factor");
     switch (input_token) {
         case t_literal:
             printf ("predict factor --> literal\n");
@@ -269,6 +333,7 @@ void factor () {
 }
 
 void factor_tail () {
+    check_for_errors("factor_tail");
     switch (input_token) {
         case t_mul:
             mul_op ();
@@ -295,6 +360,7 @@ void factor_tail () {
 }
 
 void add_op () {
+    check_for_errors("add_op");
     switch (input_token) {
         case t_add:
             printf ("predict add_op --> add\n");
@@ -309,6 +375,7 @@ void add_op () {
 }
 
 void mul_op () {
+    check_for_errors("mul_op");
     switch (input_token) {
         case t_mul:
             printf ("predict mul_op --> mul\n");
@@ -324,6 +391,7 @@ void mul_op () {
 
 // Bare bones - will need more logic
 void r_op () {
+    check_for_errors("r_op");
     switch (input_token) {
         case t_equal:
             match (t_equal);
@@ -356,7 +424,6 @@ void condition() {
 
 int main () {
     input_token = scan ();
-    cout << EPS("p");
     program ();
     return 0;
 }
