@@ -13,19 +13,21 @@ const char* names[] = {"read", "write", "id", "literal", "gets",
 static token input_token;
 
 void error () {
-    printf ("syntax error\n");
+    printf ("syntax errorr\n");
     exit (1);
 }
 
 void match (token expected) {
     if (input_token == expected) {
-        printf ("matched %s", names[input_token]);
+        printf ("matched %s", names[input_token]); // Remove printf
         if (input_token == t_id || input_token == t_literal)
-            printf (": %s", token_image);
-        printf ("\n");
+            printf (": %s", token_image); // Remove printf
+        printf ("\n"); // Remove printf
         input_token = scan ();
     }
-    else error ();
+    else 
+        
+        error ();
 }
 
 void program ();
@@ -54,6 +56,12 @@ void program () {
         case t_write:
             stmt_list();
             break;
+        case t_if:
+            stmt_list();
+            break;
+        case t_while:
+            stmt_list();
+            break;
         case t_eof:
             printf ("predict program --> stmt_list eof\n");
             stmt_list ();
@@ -66,10 +74,12 @@ void program () {
 void stmt_list () {
     switch (input_token) {
         case t_id:
+            printf ("predict stmt_list --> stmt stmt_list\n");
             stmt();
             stmt_list ();
             break;
         case t_read:
+            printf ("predict stmt_list --> stmt stmt_list\n");
             stmt();
             stmt_list ();
             break;
@@ -77,6 +87,16 @@ void stmt_list () {
             printf ("predict stmt_list --> stmt stmt_list\n");
             stmt ();
             stmt_list ();
+            break;
+        case t_if:
+            printf ("predict stmt_list --> stmt stmt_list\n");
+            stmt();
+            stmt_list();
+            break;
+        case t_while:
+            printf ("predict stmt_list --> stmt stmt_list\n");
+            stmt();
+            stmt_list();
             break;
         case t_eof:
             printf ("predict stmt_list --> epsilon\n");
@@ -104,6 +124,7 @@ void stmt () {
             expr ();
             break;
         case t_if:
+            printf ("predict stmt --> if cond\n");
             match (t_if);
             condition();
             // Have conditional return T/F and call next line only if T?
@@ -111,13 +132,16 @@ void stmt () {
             match(t_end);
             break;
         case t_while:
+            printf ("predict stmt --> while cond\n");
             match (t_while);
             condition();
             // Have conditional return T/F and call next line only if T?
             stmt_list();
             match(t_end);
             break;
-        default: error ();
+        default:
+            cout << input_token;
+            error ();
     }
 }
 
@@ -172,7 +196,7 @@ void term_tail () {
             term ();
             term_tail ();
             break;
-        case t_rparen: //How could this be a rparen?
+        case t_rparen: //How could this be a rparen? - if the expression is already finished - do nothing here?
         case t_id:
         case t_read:
         case t_write:
@@ -283,9 +307,25 @@ void r_op () {
 }
 
 void condition() {
-    // only execute if statement if this condi is true - make this non-void?
-    // how do we know what r_op verifies the token is?
+    // return non-void? expr rop expr must be true for SL in S to execute
     switch (input_token) {
+        case t_lparen:
+            expr();
+            r_op();
+            expr();
+            break;
+        case t_id:
+            printf("Reading id for conditional\n");
+            expr();
+            r_op();
+            expr();
+            break;
+        case t_literal:
+            expr();
+            r_op();
+            expr();
+            break;
+        default: error();
     }
 }
 
