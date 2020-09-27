@@ -16,7 +16,7 @@ token scan() {
     int i = 0;              /* index into token_image */
     /* skip white space */
     while (isspace(c)) {
-        c = getchar();
+        c = cin.get();
     }
     if (c == EOF)
         return t_eof;
