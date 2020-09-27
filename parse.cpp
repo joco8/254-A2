@@ -238,7 +238,9 @@ void program () {
     }
     syntax_tree = syntax_tree + ")";
     regex pattern_one("\\(\\)");
+    regex pattern_two("\\ )");
     syntax_tree = regex_replace(syntax_tree, pattern_one, "");
+    syntax_tree = regex_replace(syntax_tree, pattern_two, "");
     printf("\n%s\n", syntax_tree.c_str());
 }
 
