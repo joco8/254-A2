@@ -26,15 +26,19 @@ static bool FIRST(std::string symbol){
     vector<token> factor = {t_lparen, t_id, t_literal};
     vector<token> add_op = {t_add, t_sub};
     vector<token> mul_op = {t_mul, t_div};
-
+    vector<token> r_op = {t_equal, t_nequal, t_goreq, t_gthan, t_loreq, t_lthan};
+    vector<token> c = {t_lparen, t_id, t_literal};
+    
     map<std::string, vector<token> > symbolTable;
     symbolTable = {
         {"p", p}, {"stmt_list", stmt_list}, {"stmt", stmt}, {"expr", expr}, {"term_tail", term_tail},
-     {"term", term}, {"factor_tail", factor_tail}, {"factor", factor}, {"add_op", add_op}, {"mul_op", mul_op}
+     {"term", term}, {"factor_tail", factor_tail}, {"factor", factor}, {"add_op", add_op}, {"mul_op", mul_op}, {"c", c}, {"r_op", r_op}
      
     };
 
+    
     for(token i : symbolTable[symbol]) {
+        
         if(input_token == i) {
             return true;
         }
@@ -48,18 +52,22 @@ static bool FOLLOW(std::string symbol) {
     vector<token> p = {};
     vector<token> stmt_list = {t_eof};
     vector<token> stmt = {t_id, t_read, t_write, t_eof};
-    vector<token> expr = {t_rparen, t_id, t_read, t_write, t_eof};
+    vector<token> expr = {t_rparen, t_id, t_read, t_write, t_eof, t_equal, t_nequal, t_goreq, t_gthan, t_loreq, t_lthan};
     vector<token> term_tail = {t_rparen, t_id, t_read, t_write, t_eof};
     vector<token> term = {t_add, t_sub, t_rparen, t_id, t_read, t_write ,t_eof};
     vector<token> factor_tail = {t_add, t_sub, t_rparen, t_id, t_read, t_write, t_eof};
     vector<token> factor = { t_add, t_sub, t_mul, t_div, t_rparen, t_id, t_read, t_write, t_eof};
     vector<token> add_op = {t_lparen, t_id, t_literal};
     vector<token> mul_op = {t_lparen, t_id, t_literal};
+    vector<token> r_op = {t_rparen, t_id, t_read, t_write, t_eof};
+    vector<token> c = {t_equal, t_nequal, t_goreq, t_gthan, t_loreq, t_lthan};
+    
+
 
     map<std::string, vector<token> > symbolTable;
     symbolTable = {
         {"p", p}, {"stmt_list", stmt_list}, {"stmt", stmt}, {"expr", expr}, {"term_tail", term_tail},
-     {"term", term}, {"factor_tail", factor_tail}, {"factor", factor}, {"add_op", add_op}, {"mul_op", mul_op}
+     {"term", term}, {"factor_tail", factor_tail}, {"factor", factor}, {"add_op", add_op}, {"mul_op", mul_op}, {"c", c}, {"r_op", r_op}
      
     };
 
@@ -111,9 +119,10 @@ void report_error() {
 }
 
 void check_for_errors(std::string symbol) {
-
+    cout << symbol;
     if(!(FIRST(symbol) || EPS(symbol))) {
         report_error ();
+        printf("input token in error %s \n", names[input_token]);
         input_token = scan();
         while (!FIRST(symbol) && !FOLLOW(symbol) && input_token != t_eof) {
             printf("input token in error %s \n", names[input_token]);
@@ -123,7 +132,7 @@ void check_for_errors(std::string symbol) {
 }
 
 void match (token expected) {
-
+    
     if (input_token == expected) {
         printf ("matched %s", names[input_token]); // Remove printf
         if (input_token == t_id || input_token == t_literal)
@@ -459,7 +468,7 @@ void r_op () {
 
 void condition() {
     // return non-void? expr rop expr must be true for SL in S to execute
-    
+    check_for_errors("c");
     switch (input_token) {
         case t_lparen:
             expr();
