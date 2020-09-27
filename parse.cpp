@@ -14,7 +14,6 @@ const char* names[] = {"read", "write", "id", "literal", "gets",
 
 static token input_token;
 
-
 // Create dictionaries for first and follow sets of each production 
 static bool FIRST(std::string symbol){
     vector<token> p = {t_id, t_read, t_write, t_if, t_while, t_eof};
@@ -75,10 +74,6 @@ static bool FOLLOW(std::string symbol) {
 
 }
 
-
-
-
-
 // epsilon values for each production 
 static bool EPS(std::string production){
 
@@ -105,9 +100,6 @@ static bool EPS(std::string production){
     return false;
 }
 
-
-
-
 void error () {
     printf ("syntax error\n");
     return;
@@ -117,8 +109,6 @@ void error () {
 void report_error() {
     printf("\nWE GOT AN ERROR BABY WHAT DO I DO NOW?\n");
 }
-
-
 
 void check_for_errors(std::string symbol) {
 
@@ -132,7 +122,6 @@ void check_for_errors(std::string symbol) {
     }
 }
 
-
 void match (token expected) {
 
     if (input_token == expected) {
@@ -145,8 +134,6 @@ void match (token expected) {
     else 
         error ();
 }
-
-
 
 void program ();
 void stmt_list ();
@@ -258,7 +245,6 @@ void stmt () {
             printf ("predict stmt --> if cond\n");
             match (t_if);
             condition();
-            // Have conditional return T/F and call next line only if T?
             stmt_list();
             match(t_end);
             break;
@@ -266,7 +252,6 @@ void stmt () {
             printf ("predict stmt --> while cond\n");
             match (t_while);
             condition();
-            // Have conditional return T/F and call next line only if T?
             stmt_list();
             match(t_end);
             break;
