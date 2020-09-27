@@ -14,7 +14,6 @@ const char* names[] = {"read", "write", "id", "literal", "gets",
 
 static token input_token;
 
-
 // Create dictionaries for first and follow sets of each production 
 static bool FIRST(std::string symbol){
     vector<token> p = {t_id, t_read, t_write, t_if, t_while, t_eof};
@@ -83,10 +82,6 @@ static bool FOLLOW(std::string symbol) {
 
 }
 
-
-
-
-
 // epsilon values for each production 
 static bool EPS(std::string production){
 
@@ -113,9 +108,6 @@ static bool EPS(std::string production){
     return false;
 }
 
-
-
-
 void error () {
     cout << "syntax error" << endl;
     throw 1;
@@ -126,8 +118,6 @@ void error () {
 void report_error() {
     cout << "\ninput token out of place\n" ;
 }
-
-
 
 void check_for_errors(std::string symbol) {
     if(!(FIRST(symbol) || EPS(symbol))) {
@@ -141,7 +131,6 @@ void check_for_errors(std::string symbol) {
     }
 }
 
-
 void match (token expected) {
     
     if (input_token == expected) {
@@ -154,8 +143,6 @@ void match (token expected) {
     else 
         error ();
 }
-
-
 
 void program ();
 void stmt_list ();
