@@ -238,9 +238,24 @@ void program () {
     }
     syntax_tree = syntax_tree + ")";
     regex pattern_one("\\(\\)");
-    regex pattern_two("\\ )");
+    regex pattern_two("\\s\\)");
+    regex pattern_three("\\)=");
+    regex pattern_four("\\(\\s\\(");
+    regex pattern_five("\\)<>");
+    regex pattern_six("\\)<");
+    regex pattern_seven("\\)>");
+    regex pattern_eight("\\)<=");
+    regex pattern_nine("\\)>=");
     syntax_tree = regex_replace(syntax_tree, pattern_one, "");
-    syntax_tree = regex_replace(syntax_tree, pattern_two, "");
+    syntax_tree = regex_replace(syntax_tree, pattern_two, ")");
+    syntax_tree = regex_replace(syntax_tree, pattern_three, ") =");
+    syntax_tree = regex_replace(syntax_tree, pattern_four, "( (");
+    syntax_tree = regex_replace(syntax_tree, pattern_five, ") <>");
+    syntax_tree = regex_replace(syntax_tree, pattern_six, ") <");
+    syntax_tree = regex_replace(syntax_tree, pattern_seven, ") >");
+    syntax_tree = regex_replace(syntax_tree, pattern_eight, ") <=");
+    syntax_tree = regex_replace(syntax_tree, pattern_nine, ") >=");
+
     printf("\n%s\n", syntax_tree.c_str());
 }
 

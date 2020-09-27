@@ -2,8 +2,7 @@
 #include <cstdlib> 
 #include <cstring>
 #include "scan.h"
-#include <iostream> // will need to delete this as I don't think we should have print statements? 
-// Not sure which of the types we'll need yet
+#include <iostream>
 #include <cwctype>
 #include <cctype>
 
@@ -15,18 +14,14 @@ token scan() {
     static int c = ' ';
         /* next available char; extra (int) width accommodates EOF */
     int i = 0;              /* index into token_image */
-    // cout << c;
     /* skip white space */
     while (isspace(c)) {
-        // cout << c;
-        c = getchar();
-        // cout << "After get char";
+        c = cin.get();
     }
     if (c == EOF)
         return t_eof;
         
     if (isalpha(c)) { // is c an alphabetic letter
-        // cout << c;
         do {
             token_image[i++] = c;
             if (i >= MAX_TOKEN_LEN) {
@@ -46,13 +41,13 @@ token scan() {
     else if (isdigit(c)) {
         do {
             token_image[i++] = c;
-            c = getchar(); // cin
+            c = getchar();
         } while (isdigit(c));
         token_image[i] = '\0';
         return t_literal;
     } else switch (c) {
         case ':':
-            if ((c = getchar()) != '=') {
+            if (char(c = getchar()) != '=') {
                 fprintf(stderr, "error\n");
                 exit(1);
             } else {
