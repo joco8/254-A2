@@ -117,14 +117,14 @@ static bool EPS(std::string production){
 
 
 void error () {
-    printf ("syntax error\n");
+    cout << "syntax error" << endl;
     throw 1;
     return;
     // exit (1);
 }
 
 void report_error() {
-    printf("\ninput token out of place\n");
+    cout << "\ninput token out of place\n" ;
 }
 
 
@@ -132,10 +132,10 @@ void report_error() {
 void check_for_errors(std::string symbol) {
     if(!(FIRST(symbol) || EPS(symbol))) {
         report_error ();
-        printf("input token in error %s skipping and moving on\n", names[input_token]);
+        cout << "input token in error, skipping and moving on from token: " <<  names[input_token] << endl;
         input_token = scan();
         while (!FIRST(symbol) && !FOLLOW(symbol) && input_token != t_eof) {
-            printf("input token in error %s skipping and moving on \n", names[input_token]);
+            cout << "input token in error, skipping and moving on from token: " << names[input_token] << endl;
             input_token = scan();
         }
     }
@@ -145,10 +145,10 @@ void check_for_errors(std::string symbol) {
 void match (token expected) {
     
     if (input_token == expected) {
-        printf ("matched %s", names[input_token]); // Remove printf
-        if (input_token == t_id || input_token == t_literal)
-            printf (": %s", token_image); // Remove printf
-        printf ("\n"); // Remove printf
+       
+        // if (input_token == t_id || input_token == t_literal)
+            // printf (": %s", token_image); // Remove printf
+        
         input_token = scan ();
     }
     else 
@@ -178,27 +178,21 @@ void program () {
     try {
         switch (input_token) {
             case t_id:
-                printf ("predict program --> stmt_list eof\n");
                 stmt_list();
                 break;
             case t_read:
-                printf ("predict program --> stmt_list eof\n");
                 stmt_list();
                 break;
             case t_write:
-                printf ("predict program --> stmt_list eof\n");
                 stmt_list();
                 break;
             case t_if:
-                printf ("predict program --> stmt_list eof\n");
                 stmt_list();
                 break;
             case t_while:
-                printf ("predict program --> stmt_list eof\n");
                 stmt_list();
                 break;
             case t_eof:
-                printf ("predict program --> stmt_list eof\n");
                 stmt_list ();
                 match (t_eof); // Do we only match when we consume a terminal in the line of the grammar we're in the method of?
                 break;
@@ -217,33 +211,33 @@ void stmt_list () {
     try {
         switch (input_token) {
             case t_id:
-                printf ("predict stmt_list --> stmt stmt_list\n");
+                
                 stmt();
                 stmt_list ();
                 break;
             case t_read:
-                printf ("predict stmt_list --> stmt stmt_list\n");
+                
                 stmt();
                 stmt_list ();
                 break;
             case t_write:
-                printf ("predict stmt_list --> stmt stmt_list\n");
+                
                 stmt ();
                 stmt_list ();
                 break;
             case t_if:
-                printf ("predict stmt_list --> stmt stmt_list\n");
+                
                 stmt();
                 stmt_list();
                 break;
             case t_while:
-                printf ("predict stmt_list --> stmt stmt_list\n");
+                
                 stmt();
                 stmt_list();
                 break;
             case t_end:
             case t_eof:
-                printf ("predict stmt_list --> epsilon\n");
+
                 break;          /* epsilon production */
             default:
                 error ();
@@ -260,23 +254,19 @@ void stmt () {
     try {
         switch (input_token) {
             case t_id:
-                printf ("predict stmt --> id gets expr\n");
                 match (t_id);
                 match (t_gets);
                 expr ();
                 break;
             case t_read:
-                printf ("predict stmt --> read id\n");
                 match (t_read);
                 match (t_id);
                 break;
             case t_write:
-                printf ("predict stmt --> write expr\n");
                 match (t_write);
                 expr ();
                 break;
             case t_if:
-                printf ("predict stmt --> if cond\n");
                 match (t_if);
                 condition();
                 // Have conditional return T/F and call next line only if T?
@@ -284,7 +274,6 @@ void stmt () {
                 match(t_end);
                 break;
             case t_while:
-                printf ("predict stmt --> while cond\n");
                 match (t_while);
                 condition();
                 // Have conditional return T/F and call next line only if T?
@@ -311,17 +300,14 @@ void expr () {
     
         switch (input_token) {
             case t_id:
-                printf ("predict expr --> term term_tail\n");
                 term();
                 term_tail();
                 break;
             case t_literal:
-                printf ("predict expr --> term term_tail\n");
                 term();
                 term_tail();
                 break;
             case t_lparen:
-                printf ("predict expr --> term term_tail\n");
                 term ();
                 term_tail ();
                 break;
@@ -340,17 +326,17 @@ void term () {
     try{ 
         switch (input_token) {
             case t_id:
-                printf ("predict term --> factor factor_tail\n");
+                
                 factor ();
                 factor_tail ();
                 break;
             case t_literal:
-                printf ("predict term --> factor factor_tail\n");
+                
                 factor ();
                 factor_tail ();
                 break;
             case t_lparen:
-                printf ("predict term --> factor factor_tail\n");
+                
                 factor ();
                 factor_tail ();
                 break;
@@ -369,13 +355,13 @@ void term_tail () {
     try {  
         switch (input_token) {
             case t_add:
-                printf ("predict term_tail --> add_op term term_tail\n");
+                
                 add_op ();
                 term ();
                 term_tail ();
                 break;
             case t_sub:
-                printf ("predict term_tail --> sub_op term term_tail\n");
+                
                 add_op ();
                 term ();
                 term_tail ();
@@ -392,7 +378,7 @@ void term_tail () {
             case t_loreq:
             case t_end:
             case t_eof:
-                printf ("predict term_tail --> epsilon\n");
+                
                 break;          /* epsilon production */
             default:
                 error ();
@@ -408,15 +394,15 @@ void factor () {
     try{      
         switch (input_token) {
             case t_literal:
-                printf ("predict factor --> literal\n");
+                
                 match (t_literal);
                 break;
             case t_id :
-                printf ("predict factor --> id\n");
+                
                 match (t_id);
                 break;
             case t_lparen:
-                printf ("predict factor --> lparen expr rparen\n");
+                
                 match (t_lparen);
                 expr ();
                 match (t_rparen);
@@ -436,13 +422,13 @@ void factor_tail () {
     try {
         switch (input_token) {
             case t_mul:
-            printf ("predict factor_tail --> mul_op factor factor_tail\n");
+            
                 mul_op ();
                 factor ();
                 factor_tail ();
                 break;
             case t_div:
-                printf ("predict factor_tail --> div_op factor factor_tail\n");
+                
                 mul_op ();
                 factor ();
                 factor_tail ();
@@ -461,7 +447,7 @@ void factor_tail () {
             case t_loreq:
             case t_end:
             case t_eof:
-                printf ("predict factor_tail --> epsilon\n");
+                
                 break;          /* epsilon production */
             default:
                 error ();
@@ -479,11 +465,11 @@ void add_op () {
     try {
             switch (input_token) {
             case t_add:
-                printf ("predict add_op --> add\n");
+                
                 match (t_add);
                 break;
             case t_sub:
-                printf ("predict add_op --> sub\n");
+                
                 match (t_sub);
                 break;
             default:
@@ -500,11 +486,11 @@ void mul_op () {
     try {
         switch (input_token) {
         case t_mul:
-            printf ("predict mul_op --> mul\n");
+            
             match (t_mul);
             break;
         case t_div:
-            printf ("predict mul_op --> div\n");
+            
             match (t_div);
             break;
         default:
@@ -561,7 +547,7 @@ void condition() {
                 expr();
                 break;
             case t_id:
-                printf("Reading id for conditional\n");
+                
                 expr();
                 r_op();
                 expr();
