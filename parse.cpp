@@ -136,11 +136,11 @@ void check_for_errors(std::string symbol) {
 void match (token expected) {
     
     if (input_token == expected) {
-        printf ("matched %s", names[input_token]); // Remove printf
+        printf ("matched %s\n", names[input_token]); // Remove printf
         if (input_token == t_id || input_token == t_literal)
-            printf (": %s", token_image); // Remove printf
+            syntax_tree = syntax_tree + "\"" + token_image + "\" ";
         printf ("\n"); // Remove printf
-        syntax_tree = syntax_tree + names[input_token] + " ";
+        
         input_token = scan ();
     }
     else 
@@ -164,7 +164,7 @@ void condition();
 
 void program () {
     check_for_errors("p");
-    syntax_tree = syntax_tree + "(";
+    syntax_tree = syntax_tree + "(program";
     switch (input_token) {
         case t_id:
             // printf ("predict program --> stmt_list eof\n");
@@ -195,7 +195,7 @@ void program () {
             error ();
     }
     syntax_tree = syntax_tree + ")";
-    printf("%s\n", syntax_tree.c_str());
+    printf("\n%s\n", syntax_tree.c_str());
 }
 
 void stmt_list () {
@@ -279,7 +279,6 @@ void stmt () {
 
 void expr () {
     check_for_errors("expr");
-    syntax_tree = syntax_tree + "(";
     switch (input_token) {
         case t_id:
             // printf ("predict expr --> term term_tail\n");
@@ -299,12 +298,10 @@ void expr () {
         default:
             error ();
     }
-    syntax_tree = syntax_tree + ")";
 }
 
 void term () {
     check_for_errors("term");
-    syntax_tree = syntax_tree + "(";
     switch (input_token) {
         case t_id:
             // printf ("predict term --> factor factor_tail\n");
@@ -324,7 +321,6 @@ void term () {
         default:
             error ();
     }
-    syntax_tree = syntax_tree + ")";
 }
 
 void term_tail () {
