@@ -159,7 +159,7 @@ void report_error(std::string symbol) {
     cout << "Error at position " << position << " with token " <<  names[input_token] << endl;
     cout << "Expected token of the form ";
     print_expectations(symbol);
-    cout << "\n" << endl;
+    cout << "\n";
     totalErrors ++;
 }
 
@@ -175,6 +175,7 @@ void check_for_errors(std::string symbol) {
             position ++;
         }
     }
+    cout << "\n";
 }
 
 void match (token expected) {
