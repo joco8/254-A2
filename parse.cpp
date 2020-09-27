@@ -16,6 +16,8 @@ const char* names[] = {"read", "write", "id", "literal", ":=",
 static token input_token;
 
 string syntax_tree = "";
+static int totalErrors;
+static int position;
 
 // Create dictionaries for first and follow sets of each production 
 static bool FIRST(std::string symbol){
@@ -106,8 +108,10 @@ static bool EPS(std::string production){
 }
 
 void error () {
+    cout << names[input_token];
     cout << "syntax error" << endl;
     if(input_token == t_eof) {
+       
         cout << "could not recover, exiting" << endl;
         exit(1);
     }
@@ -116,18 +120,21 @@ void error () {
     return;
 }
 
-void report_error() {
-    cout << "\ninput token out of place\n" ;
+void report_error(std::string symbol) {
+    cout << "Error at position " << position << " with token " <<  names[input_token] << endl;
+    totalErrors ++;
 }
 
 void check_for_errors(std::string symbol) {
     if(!(FIRST(symbol) || EPS(symbol))) {
-        report_error ();
-        cout << "input token in error, skipping and moving on from token: " <<  names[input_token] << endl;
+        
+        report_error (symbol);
         input_token = scan();
+        position ++;
         while (!FIRST(symbol) && !FOLLOW(symbol) && input_token != t_eof) {
             cout << "input token in error, skipping and moving on from token: " << names[input_token] << endl;
             input_token = scan();
+            position ++;
         }
     }
 }
@@ -145,6 +152,7 @@ void match (token expected) {
             syntax_tree = syntax_tree + names[input_token] + " ";
         }
         input_token = scan ();
+        position++;
     }
     else 
         error ();
@@ -228,9 +236,17 @@ void stmt_list () {
             case t_eof:
                 break; /* epsilon production */
             default:
+                throw 2;
                 error ();
+                
         }
     } catch(int x) {
+        if(x == 2) {
+            cout << "Error in matching at position " << position << " with token " << names[input_token] << ", Skipping and moving on" << endl;
+            input_token = scan();
+            position ++;
+            totalErrors ++;
+        }
         check_for_errors("stmt_list");
         stmt_list();
         return;
@@ -343,7 +359,7 @@ void term_tail () {
                 term ();
                 term_tail ();
                 break;
-            case t_rparen: //How could this be a rparen? - if the expression is already finished - do nothing here?
+            case t_rparen:
             case t_id:
             case t_read:
             case t_write:
@@ -355,7 +371,7 @@ void term_tail () {
             case t_loreq:
             case t_end:
             case t_eof: 
-                break;          /* epsilon production */
+                break; /* epsilon production */
             default:
                 error ();
         }
@@ -367,6 +383,7 @@ void term_tail () {
 }
 
 void factor () {
+    
     try{      
         switch (input_token) {
             case t_literal:
@@ -406,6 +423,7 @@ void factor_tail () {
             case t_add:
             case t_sub:
             case t_rparen:
+               
             case t_id:
             case t_read:
             case t_write:
@@ -533,7 +551,14 @@ void condition() {
 }
 
 int main () {
+    totalErrors = 0;
+    position = 1;
+
     input_token = scan ();
     program ();
+
+    if(totalErrors > 0) {
+        cout << totalErrors << " Errors found " << endl;
+    }
     return 0;
 }
