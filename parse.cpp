@@ -14,6 +14,9 @@ const char* names[] = {"read", "write", "id", "literal", "gets",
 
 static token input_token;
 
+static int totalErrors;
+static int position;
+
 // Create dictionaries for first and follow sets of each production 
 static bool FIRST(std::string symbol){
     vector<token> p = {t_id, t_read, t_write, t_if, t_while, t_eof};
@@ -122,20 +125,21 @@ void error () {
     // exit (1);
 }
 
-void report_error() {
-    cout << "\ninput token out of place\n" ;
-
+void report_error(std::string symbol) {
+    cout << "Error at position " << position << " with token " <<  names[input_token] << endl;
+    totalErrors ++;
 }
 
 void check_for_errors(std::string symbol) {
     if(!(FIRST(symbol) || EPS(symbol))) {
         
-        report_error ();
-        cout << "input token in error, skipping and moving on from token: " <<  names[input_token] << endl;
+        report_error (symbol);
         input_token = scan();
+        position ++;
         while (!FIRST(symbol) && !FOLLOW(symbol) && input_token != t_eof) {
             cout << "input token in error, skipping and moving on from token: " << names[input_token] << endl;
             input_token = scan();
+            position ++;
         }
     }
 }
@@ -148,6 +152,7 @@ void match (token expected) {
             // printf (": %s", token_image); // Remove printf
         
         input_token = scan ();
+        position++;
     }
     else 
         error ();
@@ -243,7 +248,10 @@ void stmt_list () {
         }
     } catch(int x) {
         if(x == 2) {
+            cout << "Error in matching at position " << position << " with token " << names[input_token] << ", Skipping and moving on" << endl;
             input_token = scan();
+            position ++;
+            totalErrors ++;
         }
         check_for_errors("stmt_list");
         stmt_list();
@@ -572,7 +580,14 @@ void condition() {
 }
 
 int main () {
+    totalErrors = 0;
+    position = 1;
+
     input_token = scan ();
     program ();
+
+    if(totalErrors > 0) {
+        cout << totalErrors << " Errors found " << endl;
+    }
     return 0;
 }
