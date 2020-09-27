@@ -276,7 +276,7 @@ void stmt () {
 }
 
 void expr () {
-    check_for_errors("eprx");
+    check_for_errors("expr");
     switch (input_token) {
         case t_id:
             printf ("predict expr --> term term_tail\n");
