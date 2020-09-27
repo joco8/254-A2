@@ -50,6 +50,7 @@ static bool FIRST(std::string symbol){
     return false;
 }
 
+
 static bool FOLLOW(std::string symbol) {
     // Create Dictionaries for follow sets 
     vector<token> p = {};
@@ -107,6 +108,35 @@ static bool EPS(std::string production){
     return false;
 }
 
+static void print_expectations(std::string symbol) {
+    vector<token> p = {t_id, t_read, t_write, t_if, t_while, t_eof};
+    vector<token> stmt_list = {t_id, t_read, t_write, t_if, t_while};
+    vector<token> stmt = {t_id, t_read, t_write, t_if, t_while};
+    vector<token> expr = {t_lparen, t_id, t_literal};
+    vector<token> term_tail = {t_add, t_sub};
+    vector<token> term = {t_lparen, t_id, t_literal};
+    vector<token> factor_tail = {t_mul, t_div};
+    vector<token> factor = {t_lparen, t_id, t_literal};
+    vector<token> add_op = {t_add, t_sub};
+    vector<token> mul_op = {t_mul, t_div};
+    vector<token> r_op = {t_equal, t_nequal, t_goreq, t_gthan, t_loreq, t_lthan};
+    vector<token> c = {t_lparen, t_id, t_literal};
+    
+    map<std::string, vector<token> > symbolTable;
+    symbolTable = {
+        {"p", p}, {"stmt_list", stmt_list}, {"stmt", stmt}, {"expr", expr}, {"term_tail", term_tail},
+     {"term", term}, {"factor_tail", factor_tail}, {"factor", factor}, {"add_op", add_op}, {"mul_op", mul_op}, {"c", c}, {"r_op", r_op}
+     
+    };
+
+    
+    for(token i : symbolTable[symbol]) {
+        cout << names[i] << ", ";
+
+    }
+
+}
+
 void error () {
     cout << names[input_token];
     cout << "syntax error" << endl;
@@ -122,6 +152,9 @@ void error () {
 
 void report_error(std::string symbol) {
     cout << "Error at position " << position << " with token " <<  names[input_token] << endl;
+    cout << "Expected token of the form ";
+    print_expectations(symbol);
+    cout << "\n";
     totalErrors ++;
 }
 
@@ -137,13 +170,14 @@ void check_for_errors(std::string symbol) {
             position ++;
         }
     }
+    cout << "\n";
 }
 
 void match (token expected) {
     if (input_token == expected) {
         if (input_token == t_id)
             syntax_tree = syntax_tree + "\"" + token_image + "\" ";
-        else if (input_token == t_literal || input_token == t_rparen || input_token == t_lparen)
+        else if (input_token == t_literal)
         {
             syntax_tree = syntax_tree + "num \"" + token_image + "\" ";
         }
@@ -243,6 +277,8 @@ void stmt_list () {
     } catch(int x) {
         if(x == 2) {
             cout << "Error in matching at position " << position << " with token " << names[input_token] << ", Skipping and moving on" << endl;
+            
+            cout << "\n";
             input_token = scan();
             position ++;
             totalErrors ++;
