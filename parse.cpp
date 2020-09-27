@@ -109,8 +109,10 @@ static bool EPS(std::string production){
 }
 
 void error () {
+    cout << names[input_token];
     cout << "syntax error" << endl;
     if(input_token == t_eof) {
+       
         cout << "could not recover, exiting" << endl;
         exit(1);
     }
@@ -127,6 +129,7 @@ void report_error() {
 
 void check_for_errors(std::string symbol) {
     if(!(FIRST(symbol) || EPS(symbol))) {
+        
         report_error ();
         cout << "input token in error, skipping and moving on from token: " <<  names[input_token] << endl;
         input_token = scan();
@@ -201,6 +204,7 @@ void program () {
 }
 
 void stmt_list () {
+    
     try {
         switch (input_token) {
             case t_id:
@@ -233,9 +237,14 @@ void stmt_list () {
 
                 break;          /* epsilon production */
             default:
+                throw 2;
                 error ();
+                
         }
     } catch(int x) {
+        if(x == 2) {
+            input_token = scan();
+        }
         check_for_errors("stmt_list");
         stmt_list();
         return;
@@ -315,7 +324,7 @@ void expr () {
 }
 
 void term () {
-    
+
     try{ 
         switch (input_token) {
             case t_id:
@@ -344,7 +353,7 @@ void term () {
 }
 
 void term_tail () {
-    
+   
     try {  
         switch (input_token) {
             case t_add:
@@ -384,6 +393,7 @@ void term_tail () {
 }
 
 void factor () {
+    
     try{      
         switch (input_token) {
             case t_literal:
@@ -429,6 +439,7 @@ void factor_tail () {
             case t_add:
             case t_sub:
             case t_rparen:
+               
             case t_id:
             case t_read:
             case t_write:
