@@ -11,6 +11,8 @@ clean:
 
 test:
 	./parse < test1.txt
+test2:
+	./parse < test2.txt
 
 parse.o: scan.h
 scan.o: scan.h
