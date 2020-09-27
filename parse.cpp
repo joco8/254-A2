@@ -3,13 +3,14 @@
 #include <iostream>
 #include <vector>
 #include <map>
+#include <regex>
 #include "scan.h"
 
 using namespace std;
 
-const char* names[] = {"read", "write", "id", "literal", "gets",
-                       "add", "sub", "mul", "div", "lparen", "rparen", "eof",
-                       "equal", "nequal", "lthan", "gthan", "goreq", "loreq",
+const char* names[] = {"read", "write", "id", "literal", ":=",
+                       "+", "-", "*", "/", "(", ")", "eof",
+                       "=", "<>", "<", ">", ">=", "<=",
                        "if", "while", "end"};
 
 static token input_token;
@@ -38,14 +39,12 @@ static bool FIRST(std::string symbol){
      
     };
 
-    
     for(token i : symbolTable[symbol]) {
         
         if(input_token == i) {
             return true;
         }
     }
-
     return false;
 }
 
@@ -64,8 +63,6 @@ static bool FOLLOW(std::string symbol) {
     vector<token> r_op = {t_rparen, t_id, t_read, t_write, t_eof};
     vector<token> c = {t_equal, t_nequal, t_goreq, t_gthan, t_loreq, t_lthan};
     
-
-
     map<std::string, vector<token> > symbolTable;
     symbolTable = {
         {"p", p}, {"stmt_list", stmt_list}, {"stmt", stmt}, {"expr", expr}, {"term_tail", term_tail},
@@ -79,9 +76,7 @@ static bool FOLLOW(std::string symbol) {
             return true;
         }
     }
-
     return false;
-
 }
 
 // epsilon values for each production 
@@ -112,35 +107,41 @@ static bool EPS(std::string production){
 
 void error () {
     printf ("syntax error\n");
+    throw 1;
     return;
     // exit (1);
 }
 
 void report_error() {
-    printf("\nWE GOT AN ERROR BABY WHAT DO I DO NOW?\n");
+    printf("\ninput token out of place\n");
 }
 
 void check_for_errors(std::string symbol) {
-    cout << symbol;
     if(!(FIRST(symbol) || EPS(symbol))) {
         report_error ();
-        printf("input token in error %s \n", names[input_token]);
+        printf("input token in error %s skipping and moving on\n", names[input_token]);
         input_token = scan();
         while (!FIRST(symbol) && !FOLLOW(symbol) && input_token != t_eof) {
-            printf("input token in error %s \n", names[input_token]);
+            printf("input token in error %s skipping and moving on \n", names[input_token]);
             input_token = scan();
         }
     }
 }
 
 void match (token expected) {
-    
     if (input_token == expected) {
         printf ("matched %s\n", names[input_token]); // Remove printf
-        if (input_token == t_id || input_token == t_literal)
+        if (input_token == t_id)
             syntax_tree = syntax_tree + "\"" + token_image + "\" ";
+        else if (input_token == t_literal)
+        {
+            syntax_tree = syntax_tree + "num \"" + token_image + "\" ";
+        }
+        else
+        {
+            syntax_tree = syntax_tree + names[input_token] + " ";
+        }
         printf ("\n"); // Remove printf
-        
         input_token = scan ();
     }
     else 
@@ -163,283 +164,326 @@ void condition();
 // TODO: Delete "predict program" print statements when no longer useful - can not use 'printf'
 
 void program () {
-    check_for_errors("p");
     syntax_tree = syntax_tree + "(program";
-    switch (input_token) {
-        case t_id:
-            // printf ("predict program --> stmt_list eof\n");
-            stmt_list();
-            break;
-        case t_read:
-            // printf ("predict program --> stmt_list eof\n");
-            stmt_list();
-            break;
-        case t_write:
-            // printf ("predict program --> stmt_list eof\n");
-            stmt_list();
-            break;
-        case t_if:
-            // printf ("predict program --> stmt_list eof\n");
-            stmt_list();
-            break;
-        case t_while:
-            // printf ("predict program --> stmt_list eof\n");
-            stmt_list();
-            break;
-        case t_eof:
-            // printf ("predict program --> stmt_list eof\n");
-            stmt_list ();
-            match (t_eof); // Do we only match when we consume a terminal in the line of the grammar we're in the method of?
-            break;
-        default:
-            error ();
+    try {
+        switch (input_token) {
+            case t_id:
+                printf ("predict program --> stmt_list eof\n");
+                stmt_list();
+                break;
+            case t_read:
+                printf ("predict program --> stmt_list eof\n");
+                stmt_list();
+                break;
+            case t_write:
+                printf ("predict program --> stmt_list eof\n");
+                stmt_list();
+                break;
+            case t_if:
+                printf ("predict program --> stmt_list eof\n");
+                stmt_list();
+                break;
+            case t_while:
+                printf ("predict program --> stmt_list eof\n");
+                stmt_list();
+                break;
+            case t_eof:
+                printf ("predict program --> stmt_list eof\n");
+                stmt_list ();
+                match (t_eof); // Do we only match when we consume a terminal in the line of the grammar we're in the method of?
+                break;
+            default:
+                error ();
+        }
+    } catch (int x) {
+        check_for_errors("p");
+        program();
+        return;
     }
     syntax_tree = syntax_tree + ")";
+    regex pattern_one("\\(\\)");
+    syntax_tree = regex_replace(syntax_tree, pattern_one, "");
     printf("\n%s\n", syntax_tree.c_str());
 }
 
 void stmt_list () {
-    check_for_errors("stmt_list");
-    syntax_tree = syntax_tree + "[";
-    switch (input_token) {
-        case t_id:
-            // printf ("predict stmt_list --> stmt stmt_list\n");
-            stmt();
-            stmt_list ();
-            break;
-        case t_read:
-            // printf ("predict stmt_list --> stmt stmt_list\n");
-            stmt();
-            stmt_list ();
-            break;
-        case t_write:
-            // printf ("predict stmt_list --> stmt stmt_list\n");
-            stmt ();
-            stmt_list ();
-            break;
-        case t_if:
-            // printf ("predict stmt_list --> stmt stmt_list\n");
-            stmt();
-            stmt_list();
-            break;
-        case t_while:
-            // printf ("predict stmt_list --> stmt stmt_list\n");
-            stmt();
-            stmt_list();
-            break;
-        case t_end:
-        case t_eof:
-            // printf ("predict stmt_list --> epsilon\n");
-            break;          /* epsilon production */
-        default:
-            error ();
+    syntax_tree = syntax_tree + "(";
+    try {
+        switch (input_token) {
+            case t_id:
+                printf ("predict stmt_list --> stmt stmt_list\n");
+                stmt();
+                stmt_list ();
+                break;
+            case t_read:
+                printf ("predict stmt_list --> stmt stmt_list\n");
+                stmt();
+                stmt_list ();
+                break;
+            case t_write:
+                printf ("predict stmt_list --> stmt stmt_list\n");
+                stmt ();
+                stmt_list ();
+                break;
+            case t_if:
+                printf ("predict stmt_list --> stmt stmt_list\n");
+                stmt();
+                stmt_list();
+                break;
+            case t_while:
+                printf ("predict stmt_list --> stmt stmt_list\n");
+                stmt();
+                stmt_list();
+                break;
+            case t_end:
+            case t_eof:
+                printf ("predict stmt_list --> epsilon\n");
+                break;          /* epsilon production */
+            default:
+                error ();
+        }
+    } catch(int x) {
+        check_for_errors("stmt_list");
+        stmt_list();
+        return;
     }
-    syntax_tree = syntax_tree + "]";
+    syntax_tree = syntax_tree + ")";
 }
 
 void stmt () {
-    check_for_errors("stmt");
     syntax_tree = syntax_tree + "(";
-    switch (input_token) {
-        case t_id:
-            // printf ("predict stmt --> id gets expr\n");
-            match (t_id);
-            match (t_gets);
-            expr ();
-            break;
-        case t_read:
-            // printf ("predict stmt --> read id\n");
-            match (t_read);
-            match (t_id);
-            break;
-        case t_write:
-            // printf ("predict stmt --> write expr\n");
-            match (t_write);
-            expr ();
-            break;
-        case t_if:
-            // printf ("predict stmt --> if cond\n");
-            match (t_if);
-            condition();
-            stmt_list();
-            match(t_end);
-            break;
-        case t_while:
-            // printf ("predict stmt --> while cond\n");
-            match (t_while);
-            condition();
-            stmt_list();
-            match(t_end);
-            break;
-        default:
-            error ();
+    try {
+        switch (input_token) {
+            case t_id:
+                printf ("predict stmt --> id gets expr\n");
+                match (t_id);
+                match (t_gets);
+                expr ();
+                break;
+            case t_read:
+                printf ("predict stmt --> read id\n");
+                match (t_read);
+                match (t_id);
+                break;
+            case t_write:
+                printf ("predict stmt --> write expr\n");
+                match (t_write);
+                expr ();
+                break;
+            case t_if:
+                printf ("predict stmt --> if cond\n");
+                match (t_if);
+                condition();
+                stmt_list();
+                match(t_end);
+                break;
+            case t_while:
+                printf ("predict stmt --> while cond\n");
+                match (t_while);
+                condition();
+                stmt_list();
+                match(t_end);
+                break;
+            default:
+                error ();
+        }
+    } catch (int x) {
+        check_for_errors("stmt");
+        stmt();
+        return;
     }
-    syntax_tree = syntax_tree + "(";
+    syntax_tree = syntax_tree + ")";
 }
 
 void expr () {
-    check_for_errors("expr");
-    switch (input_token) {
-        case t_id:
-            // printf ("predict expr --> term term_tail\n");
-            term();
-            term_tail();
-            break;
-        case t_literal:
-            // printf ("predict expr --> term term_tail\n");
-            term();
-            term_tail();
-            break;
-        case t_lparen:
-            // printf ("predict expr --> term term_tail\n");
-            term ();
-            term_tail ();
-            break;
-        default:
-            error ();
+    try{
+        switch (input_token) {
+            case t_id:
+                printf ("predict expr --> term term_tail\n");
+                term();
+                term_tail();
+                break;
+            case t_literal:
+                printf ("predict expr --> term term_tail\n");
+                term();
+                term_tail();
+                break;
+            case t_lparen:
+                printf ("predict expr --> term term_tail\n");
+                term ();
+                term_tail ();
+                break;
+            default:
+                error ();
+        }
+    } catch (int x) {
+        check_for_errors("expr");
+        expr();
+        return;
     }
 }
 
 void term () {
-    check_for_errors("term");
-    switch (input_token) {
-        case t_id:
-            // printf ("predict term --> factor factor_tail\n");
-            factor ();
-            factor_tail ();
-            break;
-        case t_literal:
-            // printf ("predict term --> factor factor_tail\n");
-            factor ();
-            factor_tail ();
-            break;
-        case t_lparen:
-            // printf ("predict term --> factor factor_tail\n");
-            factor ();
-            factor_tail ();
-            break;
-        default:
-            error ();
+    syntax_tree = syntax_tree + "(";
+    try{ 
+        switch (input_token) {
+            case t_id:
+                printf ("predict term --> factor factor_tail\n");
+                factor ();
+                factor_tail ();
+                break;
+            case t_literal:
+                printf ("predict term --> factor factor_tail\n");
+                factor ();
+                factor_tail ();
+                break;
+            case t_lparen:
+                printf ("predict term --> factor factor_tail\n");
+                factor ();
+                factor_tail ();
+                break;
+            default:
+                error ();
+        }
+    } catch (int x) {
+        check_for_errors("term");
+        term();
+        return;
     }
+    syntax_tree = syntax_tree + ")";
 }
 
 void term_tail () {
-    check_for_errors("term_tail");
-    syntax_tree = syntax_tree + "(";
-    switch (input_token) {
-        case t_add:
-            // printf ("predict term_tail --> add_op term term_tail\n");
-            add_op ();
-            term ();
-            term_tail ();
-            break;
-        case t_sub:
-            // printf ("predict term_tail --> sub_op term term_tail\n");
-            add_op ();
-            term ();
-            term_tail ();
-            break;
-        case t_rparen: //How could this be a rparen? - if the expression is already finished - do nothing here?
-        case t_id:
-        case t_read:
-        case t_write:
-        case t_equal:
-        case t_nequal:
-        case t_gthan:
-        case t_lthan:
-        case t_goreq:
-        case t_loreq:
-        case t_end:
-        case t_eof:
-            // printf ("predict term_tail --> epsilon\n");
-            break;          /* epsilon production */
-        default:
-            error ();
+    try {  
+        switch (input_token) {
+            case t_add:
+                printf ("predict term_tail --> add_op term term_tail\n");
+                add_op ();
+                term ();
+                term_tail ();
+                break;
+            case t_sub:
+                printf ("predict term_tail --> sub_op term term_tail\n");
+                add_op ();
+                term ();
+                term_tail ();
+                break;
+            case t_rparen: //How could this be a rparen? - if the expression is already finished - do nothing here?
+            case t_id:
+            case t_read:
+            case t_write:
+            case t_equal:
+            case t_nequal:
+            case t_gthan:
+            case t_lthan:
+            case t_goreq:
+            case t_loreq:
+            case t_end:
+            case t_eof:
+                printf ("predict term_tail --> epsilon\n");
+                break;          /* epsilon production */
+            default:
+                error ();
+        }
+    } catch (int x) {
+        check_for_errors("term_tail");
+        term_tail();
+        return;
     }
-    syntax_tree = syntax_tree + ")";
 }
 
 void factor () {
-    check_for_errors("factor");
-    syntax_tree = syntax_tree + "(";
-    switch (input_token) {
-        case t_literal:
-            // printf ("predict factor --> literal\n");
-            match (t_literal);
-            break;
-        case t_id :
-            // printf ("predict factor --> id\n");
-            match (t_id);
-            break;
-        case t_lparen:
-            // printf ("predict factor --> lparen expr rparen\n");
-            match (t_lparen);
-            expr ();
-            match (t_rparen);
-            break;
-        default:
-            error ();
+    try{      
+        switch (input_token) {
+            case t_literal:
+                printf ("predict factor --> literal\n");
+                match (t_literal);
+                break;
+            case t_id :
+                printf ("predict factor --> id\n");
+                match (t_id);
+                break;
+            case t_lparen:
+                printf ("predict factor --> lparen expr rparen\n");
+                match (t_lparen);
+                expr ();
+                match (t_rparen);
+                break;
+            default:
+                error ();
+        }
+    } catch (int x) {
+        check_for_errors("factor");
+        factor();
+        return;
     }
-    syntax_tree = syntax_tree + ")";
 }
 
 void factor_tail () {
-    check_for_errors("factor_tail");
-    syntax_tree = syntax_tree + "(";
-    switch (input_token) {
-        case t_mul:
-        // printf ("predict factor_tail --> mul_op factor factor_tail\n");
-            mul_op ();
-            factor ();
-            factor_tail ();
-            break;
-        case t_div:
-            // printf ("predict factor_tail --> div_op factor factor_tail\n");
-            mul_op ();
-            factor ();
-            factor_tail ();
-            break;
-        case t_add:
-        case t_sub:
-        case t_rparen:
-        case t_id:
-        case t_read:
-        case t_write:
-        case t_equal:
-        case t_nequal:
-        case t_gthan:
-        case t_lthan:
-        case t_goreq:
-        case t_loreq:
-        case t_end:
-        case t_eof:
-            // printf ("predict factor_tail --> epsilon\n");
-            break;          /* epsilon production */
-        default:
-            error ();
+    try {
+        switch (input_token) {
+            case t_mul:
+            printf ("predict factor_tail --> mul_op factor factor_tail\n");
+                mul_op ();
+                factor ();
+                factor_tail ();
+                break;
+            case t_div:
+                printf ("predict factor_tail --> div_op factor factor_tail\n");
+                mul_op ();
+                factor ();
+                factor_tail ();
+                break;
+            case t_add:
+            case t_sub:
+            case t_rparen:
+            case t_id:
+            case t_read:
+            case t_write:
+            case t_equal:
+            case t_nequal:
+            case t_gthan:
+            case t_lthan:
+            case t_goreq:
+            case t_loreq:
+            case t_end:
+            case t_eof:
+                printf ("predict factor_tail --> epsilon\n");
+                break;          /* epsilon production */
+            default:
+                error ();
+        }
+    } catch (int x) {
+        check_for_errors("factor_tail");
+        factor_tail();
+        return;
     }
-    syntax_tree = syntax_tree + ")";
 }
 
 void add_op () {
-    check_for_errors("add_op");
-    switch (input_token) {
-        case t_add:
-            // printf ("predict add_op --> add\n");
-            match (t_add);
-            break;
-        case t_sub:
-            // printf ("predict add_op --> sub\n");
-            match (t_sub);
-            break;
-        default:
-            error ();
+    try {
+            switch (input_token) {
+            case t_add:
+                printf ("predict add_op --> add\n");
+                match (t_add);
+                break;
+            case t_sub:
+                printf ("predict add_op --> sub\n");
+                match (t_sub);
+                break;
+            default:
+                error ();
+        }
+    } catch (int x) {
+        check_for_errors("add_op");
+        add_op();
+        return;
     }
 }
 
 void mul_op () {
-    check_for_errors("mul_op");
-    switch (input_token) {
+    try {
+        switch (input_token) {
         case t_mul:
             // printf ("predict mul_op --> mul\n");
             match (t_mul);
@@ -450,59 +494,76 @@ void mul_op () {
             break;
         default:
             error ();
-    }
+        }
+    }  catch(int x) {
+        check_for_errors("mul_op");
+        mul_op();
+        return;
+    } 
+       
 }
 
 // Bare bones - will need more logic
 void r_op () {
-    check_for_errors("r_op");
-    switch (input_token) {
-        case t_equal:
-            match (t_equal);
-            break;
-        case t_nequal:
-            match (t_nequal);
-            break;
-        case t_lthan:
-            match (t_lthan);
-            break;
-        case t_gthan:
-            match (t_gthan);
-            break;
-        case t_loreq:
-            match (t_loreq);
-            break;
-        case t_goreq:
-            match (t_goreq);
-            break;
-        default:
-            error ();
+    try {
+        switch (input_token) {
+            case t_equal:
+                match (t_equal);
+                break;
+            case t_nequal:
+                match (t_nequal);
+                break;
+            case t_lthan:
+                match (t_lthan);
+                break;
+            case t_gthan:
+                match (t_gthan);
+                break;
+            case t_loreq:
+                match (t_loreq);
+                break;
+            case t_goreq:
+                match (t_goreq);
+                break;
+            default:
+                error ();
+        }
+    } catch (int x) {
+        check_for_errors("r_op");
+        r_op();
+        return;
     }
+
 }
 
 void condition() {
     // return non-void? expr rop expr must be true for SL in S to execute
-    check_for_errors("c");
     syntax_tree = syntax_tree + "(";
-    switch (input_token) {
-        case t_lparen:
-            expr();
-            r_op();
-            expr();
-            break;
-        case t_id:
-            // printf("Reading id for conditional\n");
-            expr();
-            r_op();
-            expr();
-            break;
-        case t_literal:
-            expr();
-            r_op();
-            expr();
-            break;
-        default:
-            error();
+    try {
+        switch (input_token) {
+            case t_lparen:
+                expr();
+                r_op();
+                expr();
+                break;
+            case t_id:
+                printf("Reading id for conditional\n");
+                expr();
+                r_op();
+                expr();
+                break;
+            case t_literal:
+                expr();
+                r_op();
+                expr();
+                break;
+            default:
+                error();
+        }
+    } catch (int x) {
+        check_for_errors("c");
+        condition();
+        return;
     }
     syntax_tree = syntax_tree + ")";
 }
