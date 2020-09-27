@@ -28,7 +28,7 @@ token scan() {
                 cout << "max token length exceeded\n";
                 exit(1);
             }
-            c = getchar();
+            c = cin.get();
         } while (isalpha(c) || isdigit(c) || c == '_');
         token_image[i] = '\0';
         if (!strcmp(token_image, "read")) return t_read;
@@ -41,42 +41,42 @@ token scan() {
     else if (isdigit(c)) {
         do {
             token_image[i++] = c;
-            c = getchar();
+            c = cin.get();
         } while (isdigit(c));
         token_image[i] = '\0';
         return t_literal;
     } else switch (c) {
         case ':':
-            if (char(c = getchar()) != '=') {
+            if (char(c = cin.get()) != '=') {
                 fprintf(stderr, "error\n");
                 exit(1);
             } else {
-                c = getchar();
+                c = cin.get();
                 return t_gets;
             }
             break;
-        case '(': c = getchar(); return t_lparen;
-        case ')': c = getchar(); return t_rparen;
-        case '+': c = getchar(); return t_add;
-        case '-': c = getchar(); return t_sub;
-        case '*': c = getchar(); return t_mul;
-        case '/': c = getchar(); return t_div;
-        case '=': c = getchar(); return t_equal;
+        case '(': c = cin.get(); return t_lparen;
+        case ')': c = cin.get(); return t_rparen;
+        case '+': c = cin.get(); return t_add;
+        case '-': c = cin.get(); return t_sub;
+        case '*': c = cin.get(); return t_mul;
+        case '/': c = cin.get(); return t_div;
+        case '=': c = cin.get(); return t_equal;
         case '<': 
-            c = getchar();
+            c = cin.get();
             if (c == '>') {
-                c = getchar();
+                c = cin.get();
                 return t_nequal;
             } else if (c == '=') {
-                c = getchar();
+                c = cin.get();
                 return t_loreq;
             } else {
                 return t_lthan;
             }
         case '>': 
-            c = getchar();
+            c = cin.get();
             if (c == '=') {
-                c = getchar();
+                c = cin.get();
                 return t_goreq;
             } else {
                 return t_gthan;
