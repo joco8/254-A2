@@ -110,6 +110,11 @@ static bool EPS(std::string production){
 
 void error () {
     cout << "syntax error" << endl;
+    if(input_token == t_eof) {
+        cout << "could not recover, exiting" << endl;
+        exit(1);
+    }
+    
     throw 1;
     return;
     // exit (1);
@@ -117,6 +122,7 @@ void error () {
 
 void report_error() {
     cout << "\ninput token out of place\n" ;
+
 }
 
 void check_for_errors(std::string symbol) {
