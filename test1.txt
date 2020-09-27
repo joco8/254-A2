@@ -1,6 +1,2 @@
-<<<<<<< HEAD
-a + 1
-=======
-read a 
-write(a + 1)
->>>>>>> 574fea781f6b492c06324740bde55c1019505868
+read a
+write 2 * 5

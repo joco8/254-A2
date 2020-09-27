@@ -14,6 +14,8 @@ const char* names[] = {"read", "write", "id", "literal", "gets",
 
 static token input_token;
 
+string syntax_tree = "";
+
 // Create dictionaries for first and follow sets of each production 
 static bool FIRST(std::string symbol){
     vector<token> p = {t_id, t_read, t_write, t_if, t_while, t_eof};
@@ -129,6 +131,7 @@ void match (token expected) {
         if (input_token == t_id || input_token == t_literal)
             printf (": %s", token_image); // Remove printf
         printf ("\n"); // Remove printf
+        syntax_tree = syntax_tree + names[input_token] + " ";
         input_token = scan ();
     }
     else 
@@ -152,8 +155,7 @@ void condition();
 
 void program () {
     check_for_errors("p");
-
-    
+    syntax_tree = syntax_tree + "(";
     switch (input_token) {
         case t_id:
             // printf ("predict program --> stmt_list eof\n");
@@ -183,10 +185,13 @@ void program () {
         default:
             error ();
     }
+    syntax_tree = syntax_tree + ")";
+    printf("%s\n", syntax_tree.c_str());
 }
 
 void stmt_list () {
     check_for_errors("stmt_list");
+    syntax_tree = syntax_tree + "[";
     switch (input_token) {
         case t_id:
             // printf ("predict stmt_list --> stmt stmt_list\n");
@@ -220,10 +225,12 @@ void stmt_list () {
         default:
             error ();
     }
+    syntax_tree = syntax_tree + "]";
 }
 
 void stmt () {
     check_for_errors("stmt");
+    syntax_tree = syntax_tree + "(";
     switch (input_token) {
         case t_id:
             // printf ("predict stmt --> id gets expr\n");
@@ -258,10 +265,12 @@ void stmt () {
         default:
             error ();
     }
+    syntax_tree = syntax_tree + "(";
 }
 
 void expr () {
     check_for_errors("expr");
+    syntax_tree = syntax_tree + "(";
     switch (input_token) {
         case t_id:
             // printf ("predict expr --> term term_tail\n");
@@ -281,10 +290,12 @@ void expr () {
         default:
             error ();
     }
+    syntax_tree = syntax_tree + ")";
 }
 
 void term () {
     check_for_errors("term");
+    syntax_tree = syntax_tree + "(";
     switch (input_token) {
         case t_id:
             // printf ("predict term --> factor factor_tail\n");
@@ -304,10 +315,12 @@ void term () {
         default:
             error ();
     }
+    syntax_tree = syntax_tree + ")";
 }
 
 void term_tail () {
     check_for_errors("term_tail");
+    syntax_tree = syntax_tree + "(";
     switch (input_token) {
         case t_add:
             // printf ("predict term_tail --> add_op term term_tail\n");
@@ -338,10 +351,12 @@ void term_tail () {
         default:
             error ();
     }
+    syntax_tree = syntax_tree + ")";
 }
 
 void factor () {
     check_for_errors("factor");
+    syntax_tree = syntax_tree + "(";
     switch (input_token) {
         case t_literal:
             // printf ("predict factor --> literal\n");
@@ -360,10 +375,12 @@ void factor () {
         default:
             error ();
     }
+    syntax_tree = syntax_tree + ")";
 }
 
 void factor_tail () {
     check_for_errors("factor_tail");
+    syntax_tree = syntax_tree + "(";
     switch (input_token) {
         case t_mul:
         // printf ("predict factor_tail --> mul_op factor factor_tail\n");
@@ -396,6 +413,7 @@ void factor_tail () {
         default:
             error ();
     }
+    syntax_tree = syntax_tree + ")";
 }
 
 void add_op () {
@@ -459,7 +477,7 @@ void r_op () {
 
 void condition() {
     // return non-void? expr rop expr must be true for SL in S to execute
-    
+    syntax_tree = syntax_tree + "(";
     switch (input_token) {
         case t_lparen:
             expr();
@@ -480,6 +498,7 @@ void condition() {
         default:
             error();
     }
+    syntax_tree = syntax_tree + ")";
 }
 
 int main () {
