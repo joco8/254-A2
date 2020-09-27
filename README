@@ -1,1 +1,23 @@
-Test readme edit
+Liam Geffen and Josh Cohen
+CSC 254
+9/27/20
+
+Our calculator grammar and error handling works as intended and as detailed in the project description. We have provided 6 tests spanning
+a variety of cases.  As is evident when running them, all cases are handled correctly, and the syntax trees are correctly outputed when
+a correct grammar is provided or an error is non-fatal and the program can recover by skipping over an incorrect token.
+
+To divide the labor for this project, we both planned out the entire program and solidified our conceptual understanding of what we needed
+to do.  Josh worked primarily on the error handling and recovery, while I extended the grammar and worked on the syntax tree building.
+We both translated it from C++.  We both helped debug and troubleshoot problems with all aspects of the program.
+
+Makefile: a file to compile and run the parser and the tests
+    - To compile the parser, run 'make'
+    - To run tests 1-6, type 'make test1', 'make test2', ..., 'make test6' after compiling the parser
+    - Custom tests can be added by adding to the Makefile or running the tests as std input
+
+Expected output:
+    - The expected output for a syntactically correct program is an equivalent paranthetically delimited parse tree
+    - If an error is detected and can be recovered from, the program will output the error, the position that it occurred, the token that
+    caused it, and will notify the user that it is skipping and moving on, it will in most cases return the expected next production tokens.
+    The program will then output the equivalent paranthetically delimited parse tree of the correct or assumed correct program.
+    - It will also print out the number of errors found

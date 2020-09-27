@@ -9,7 +9,7 @@ parse: parse.cpp
 clean:
 	rm *.o parse
 
-test:
+test1:
 	./parse < test1.txt
 test2:
 	./parse < test2.txt
