@@ -13,6 +13,8 @@ test:
 	./parse < test1.txt
 test2:
 	./parse < test2.txt
+test3: 
+	./parse < test3.txt
 
 parse.o: scan.h
 scan.o: scan.h
