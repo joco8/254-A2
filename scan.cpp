@@ -46,7 +46,7 @@ token scan() {
     else if (isdigit(c)) {
         do {
             token_image[i++] = c;
-            c = getchar();
+            c = getchar(); // cin
         } while (isdigit(c));
         token_image[i] = '\0';
         return t_literal;

@@ -118,7 +118,6 @@ void error () {
 
 void report_error() {
     cout << "\ninput token out of place\n" ;
-
 }
 
 void check_for_errors(std::string symbol) {
@@ -137,7 +136,7 @@ void match (token expected) {
     if (input_token == expected) {
         if (input_token == t_id)
             syntax_tree = syntax_tree + "\"" + token_image + "\" ";
-        else if (input_token == t_literal)
+        else if (input_token == t_literal || input_token == t_rparen || input_token == t_lparen)
         {
             syntax_tree = syntax_tree + "num \"" + token_image + "\" ";
         }
@@ -164,8 +163,6 @@ void mul_op ();
 void r_op();
 void condition();
 
-// TODO: Delete "predict program" print statements when no longer useful - can not use 'printf'
-
 void program () {
     syntax_tree = syntax_tree + "(program";
     try {
@@ -187,7 +184,7 @@ void program () {
                 break;
             case t_eof:
                 stmt_list ();
-                match (t_eof); // Do we only match when we consume a terminal in the line of the grammar we're in the method of?
+                match (t_eof);
                 break;
             default:
                 error ();
@@ -229,7 +226,7 @@ void stmt_list () {
                 break;
             case t_end:
             case t_eof:
-                break;          /* epsilon production */
+                break; /* epsilon production */
             default:
                 error ();
         }
