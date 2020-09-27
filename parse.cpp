@@ -54,17 +54,17 @@ static bool FIRST(std::string symbol){
 static bool FOLLOW(std::string symbol) {
     // Create Dictionaries for follow sets 
     vector<token> p = {};
-    vector<token> stmt_list = {t_eof};
+    vector<token> stmt_list = {t_eof, t_end};
     vector<token> stmt = {t_id, t_read, t_write, t_eof};
-    vector<token> expr = {t_rparen, t_id, t_read, t_write, t_eof, t_equal, t_nequal, t_goreq, t_gthan, t_loreq, t_lthan};
-    vector<token> term_tail = {t_rparen, t_id, t_read, t_write, t_eof};
+    vector<token> expr = {t_rparen, t_id, t_read, t_write, t_eof, t_equal, t_nequal, t_goreq, t_gthan, t_loreq, t_lthan, t_if, t_while};
+    vector<token> term_tail = {t_rparen, t_id, t_read, t_write, t_eof, t_if, t_while};
     vector<token> term = {t_add, t_sub, t_rparen, t_id, t_read, t_write ,t_eof};
-    vector<token> factor_tail = {t_add, t_sub, t_rparen, t_id, t_read, t_write, t_eof};
+    vector<token> factor_tail = {t_add, t_sub, t_rparen, t_id, t_read, t_write, t_eof, t_if, t_while};
     vector<token> factor = { t_add, t_sub, t_mul, t_div, t_rparen, t_id, t_read, t_write, t_eof};
     vector<token> add_op = {t_lparen, t_id, t_literal};
     vector<token> mul_op = {t_lparen, t_id, t_literal};
     vector<token> r_op = {t_rparen, t_id, t_read, t_write, t_eof};
-    vector<token> c = {t_equal, t_nequal, t_goreq, t_gthan, t_loreq, t_lthan};
+    vector<token> c = {t_id, t_read, t_write, t_if, t_while, t_equal, t_nequal, t_goreq, t_gthan, t_loreq, t_lthan};
     
     map<std::string, vector<token> > symbolTable;
     symbolTable = {
@@ -74,7 +74,6 @@ static bool FOLLOW(std::string symbol) {
     };
 
     for(token i : symbolTable[symbol]) {
-        cout << i;
         if(input_token == i) {
             return true;
         }
@@ -138,8 +137,8 @@ static void print_expectations(std::string symbol) {
 }
 
 void error () {
-    cout << names[input_token];
-    cout << "syntax error" << endl;
+    cout << "syntax error - incorrectly detecting ";
+    cout << names[input_token] << endl;
     if(input_token == t_eof) {
        
         cout << "could not recover, exiting" << endl;
@@ -246,6 +245,7 @@ void program () {
     regex pattern_seven("\\)>");
     regex pattern_eight("\\)<=");
     regex pattern_nine("\\)>=");
+    regex pattern_ten("\\(\\s\\(");
     syntax_tree = regex_replace(syntax_tree, pattern_one, "");
     syntax_tree = regex_replace(syntax_tree, pattern_two, ")");
     syntax_tree = regex_replace(syntax_tree, pattern_three, ") =");
@@ -255,6 +255,7 @@ void program () {
     syntax_tree = regex_replace(syntax_tree, pattern_seven, ") >");
     syntax_tree = regex_replace(syntax_tree, pattern_eight, ") <=");
     syntax_tree = regex_replace(syntax_tree, pattern_nine, ") >=");
+    syntax_tree = regex_replace(syntax_tree, pattern_ten, "((");
 
     printf("\n%s\n", syntax_tree.c_str());
 }
@@ -362,6 +363,8 @@ void expr () {
                 term ();
                 term_tail ();
                 break;
+            case t_if:
+            case t_while:
             default:
                 error ();
         }
@@ -423,6 +426,8 @@ void term_tail () {
             case t_goreq:
             case t_loreq:
             case t_end:
+            case t_if:
+            case t_while:
             case t_eof: 
                 break; /* epsilon production */
             default:
@@ -476,7 +481,6 @@ void factor_tail () {
             case t_add:
             case t_sub:
             case t_rparen:
-               
             case t_id:
             case t_read:
             case t_write:
@@ -487,6 +491,8 @@ void factor_tail () {
             case t_goreq:
             case t_loreq:
             case t_end:
+            case t_if:
+            case t_while:
             case t_eof:
                 break;          /* epsilon production */
             default:
@@ -582,7 +588,6 @@ void condition() {
                 expr();
                 break;
             case t_id:
-                
                 expr();
                 r_op();
                 expr();
@@ -592,6 +597,10 @@ void condition() {
                 r_op();
                 expr();
                 break;
+            case t_read:
+            case t_write:
+            case t_if:
+            case t_while:
             default:
                 error();
         }

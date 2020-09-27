@@ -1,2 +1,2 @@
 read a
-write 2 * 5
+a + 4

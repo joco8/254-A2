@@ -1,0 +1,4 @@
+read a
+if a <= 3
+write 33 +
+end
