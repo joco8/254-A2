@@ -3,17 +3,19 @@
 #include <iostream>
 #include <vector>
 #include <map>
+#include <regex>
 #include "scan.h"
 
 using namespace std;
 
-const char* names[] = {"read", "write", "id", "literal", "gets",
-                       "add", "sub", "mul", "div", "lparen", "rparen", "eof",
-                       "equal", "nequal", "lthan", "gthan", "goreq", "loreq",
+const char* names[] = {"read", "write", "id", "literal", ":=",
+                       "+", "-", "*", "/", "(", ")", "eof",
+                       "=", "<>", "<", ">", ">=", "<=",
                        "if", "while", "end"};
 
 static token input_token;
 
+string syntax_tree = "";
 static int totalErrors;
 static int position;
 
@@ -39,14 +41,12 @@ static bool FIRST(std::string symbol){
      
     };
 
-    
     for(token i : symbolTable[symbol]) {
         
         if(input_token == i) {
             return true;
         }
     }
-
     return false;
 }
 
@@ -66,8 +66,6 @@ static bool FOLLOW(std::string symbol) {
     vector<token> r_op = {t_rparen, t_id, t_read, t_write, t_eof};
     vector<token> c = {t_equal, t_nequal, t_goreq, t_gthan, t_loreq, t_lthan};
     
-
-
     map<std::string, vector<token> > symbolTable;
     symbolTable = {
         {"p", p}, {"stmt_list", stmt_list}, {"stmt", stmt}, {"expr", expr}, {"term_tail", term_tail},
@@ -81,9 +79,7 @@ static bool FOLLOW(std::string symbol) {
             return true;
         }
     }
-
     return false;
-
 }
 
 // epsilon values for each production 
@@ -152,7 +148,6 @@ void error () {
     
     throw 1;
     return;
-    // exit (1);
 }
 
 void report_error(std::string symbol) {
@@ -179,12 +174,17 @@ void check_for_errors(std::string symbol) {
 }
 
 void match (token expected) {
-    
     if (input_token == expected) {
-       
-        // if (input_token == t_id || input_token == t_literal)
-            // printf (": %s", token_image); // Remove printf
-        
+        if (input_token == t_id)
+            syntax_tree = syntax_tree + "\"" + token_image + "\" ";
+        else if (input_token == t_literal)
+        {
+            syntax_tree = syntax_tree + "num \"" + token_image + "\" ";
+        }
+        else
+        {
+            syntax_tree = syntax_tree + names[input_token] + " ";
+        }
         input_token = scan ();
         position++;
     }
@@ -205,11 +205,8 @@ void mul_op ();
 void r_op();
 void condition();
 
-// TODO: Delete "predict program" print statements when no longer useful - can not use 'printf'
-
 void program () {
-    check_for_errors("p");
-
+    syntax_tree = syntax_tree + "(program";
     try {
         switch (input_token) {
             case t_id:
@@ -229,7 +226,7 @@ void program () {
                 break;
             case t_eof:
                 stmt_list ();
-                match (t_eof); // Do we only match when we consume a terminal in the line of the grammar we're in the method of?
+                match (t_eof);
                 break;
             default:
                 error ();
@@ -239,42 +236,39 @@ void program () {
         program();
         return;
     }
-    
+    syntax_tree = syntax_tree + ")";
+    regex pattern_one("\\(\\)");
+    syntax_tree = regex_replace(syntax_tree, pattern_one, "");
+    printf("\n%s\n", syntax_tree.c_str());
 }
 
 void stmt_list () {
-    
+    syntax_tree = syntax_tree + "(";
     try {
         switch (input_token) {
             case t_id:
-                
                 stmt();
                 stmt_list ();
                 break;
             case t_read:
-                
                 stmt();
                 stmt_list ();
                 break;
             case t_write:
-                
                 stmt ();
                 stmt_list ();
                 break;
             case t_if:
-                
                 stmt();
                 stmt_list();
                 break;
             case t_while:
-                
                 stmt();
                 stmt_list();
                 break;
             case t_end:
             case t_eof:
-
-                break;          /* epsilon production */
+                break; /* epsilon production */
             default:
                 throw 2;
                 error ();
@@ -293,10 +287,11 @@ void stmt_list () {
         stmt_list();
         return;
     }
-    
+    syntax_tree = syntax_tree + ")";
 }
 
 void stmt () {
+    syntax_tree = syntax_tree + "(";
     try {
         switch (input_token) {
             case t_id:
@@ -315,35 +310,28 @@ void stmt () {
             case t_if:
                 match (t_if);
                 condition();
-                // Have conditional return T/F and call next line only if T?
                 stmt_list();
                 match(t_end);
                 break;
             case t_while:
                 match (t_while);
                 condition();
-                // Have conditional return T/F and call next line only if T?
                 stmt_list();
                 match(t_end);
                 break;
             default:
                 error ();
         }
-
     } catch (int x) {
         check_for_errors("stmt");
         stmt();
         return;
     }
-    
-    
-
+    syntax_tree = syntax_tree + ")";
 }
 
 void expr () {
     try{
-
-    
         switch (input_token) {
             case t_id:
                 term();
@@ -368,21 +356,18 @@ void expr () {
 }
 
 void term () {
-
+    syntax_tree = syntax_tree + "(";
     try{ 
         switch (input_token) {
             case t_id:
-                
                 factor ();
                 factor_tail ();
                 break;
             case t_literal:
-                
                 factor ();
                 factor_tail ();
                 break;
             case t_lparen:
-                
                 factor ();
                 factor_tail ();
                 break;
@@ -394,25 +379,23 @@ void term () {
         term();
         return;
     }
+    syntax_tree = syntax_tree + ")";
 }
 
 void term_tail () {
-   
     try {  
         switch (input_token) {
             case t_add:
-                
                 add_op ();
                 term ();
                 term_tail ();
                 break;
             case t_sub:
-                
                 add_op ();
                 term ();
                 term_tail ();
                 break;
-            case t_rparen: //How could this be a rparen? - if the expression is already finished - do nothing here?
+            case t_rparen:
             case t_id:
             case t_read:
             case t_write:
@@ -423,9 +406,8 @@ void term_tail () {
             case t_goreq:
             case t_loreq:
             case t_end:
-            case t_eof:
-                
-                break;          /* epsilon production */
+            case t_eof: 
+                break; /* epsilon production */
             default:
                 error ();
         }
@@ -441,15 +423,12 @@ void factor () {
     try{      
         switch (input_token) {
             case t_literal:
-                
                 match (t_literal);
                 break;
             case t_id :
-                
                 match (t_id);
                 break;
             case t_lparen:
-                
                 match (t_lparen);
                 expr ();
                 match (t_rparen);
@@ -465,17 +444,14 @@ void factor () {
 }
 
 void factor_tail () {
-    
     try {
         switch (input_token) {
             case t_mul:
-            
                 mul_op ();
                 factor ();
                 factor_tail ();
                 break;
             case t_div:
-                
                 mul_op ();
                 factor ();
                 factor_tail ();
@@ -495,18 +471,15 @@ void factor_tail () {
             case t_loreq:
             case t_end:
             case t_eof:
-                
                 break;          /* epsilon production */
             default:
                 error ();
         }
-
     } catch (int x) {
         check_for_errors("factor_tail");
         factor_tail();
         return;
     }
-
 }
 
 void add_op () {
@@ -534,11 +507,9 @@ void mul_op () {
     try {
         switch (input_token) {
         case t_mul:
-            
             match (t_mul);
             break;
         case t_div:
-            
             match (t_div);
             break;
         default:
@@ -552,7 +523,6 @@ void mul_op () {
        
 }
 
-// Bare bones - will need more logic
 void r_op () {
     try {
         switch (input_token) {
@@ -586,7 +556,7 @@ void r_op () {
 }
 
 void condition() {
-    // return non-void? expr rop expr must be true for SL in S to execute  
+    syntax_tree = syntax_tree + "(";
     try {
         switch (input_token) {
             case t_lparen:
@@ -613,6 +583,7 @@ void condition() {
         condition();
         return;
     }
+    syntax_tree = syntax_tree + ")";
 }
 
 int main () {
