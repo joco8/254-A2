@@ -17,9 +17,9 @@ static token input_token;
 
 // Create dictionaries for first and follow sets of each production 
 static bool FIRST(std::string symbol){
-    vector<token> p = {t_id, t_read, t_write, t_eof};
-    vector<token> stmt_list = {t_id, t_read, t_write};
-    vector<token> stmt = {t_id, t_read, t_write};
+    vector<token> p = {t_id, t_read, t_write, t_if, t_while, t_eof};
+    vector<token> stmt_list = {t_id, t_read, t_write, t_if, t_while};
+    vector<token> stmt = {t_id, t_read, t_write, t_if, t_while};
     vector<token> expr = {t_lparen, t_id, t_literal};
     vector<token> term_tail = {t_add, t_sub};
     vector<token> term = {t_lparen, t_id, t_literal};
@@ -474,6 +474,7 @@ void r_op () {
 
 void condition() {
     // return non-void? expr rop expr must be true for SL in S to execute
+    
     switch (input_token) {
         case t_lparen:
             expr();

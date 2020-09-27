@@ -1,3 +1,2 @@
-while n > 1
-    write (a + 1)
-end
+read a 
+write(a + 1)
